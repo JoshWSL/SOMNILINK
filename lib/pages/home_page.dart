@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rls_patient_app/pages/data_selection_page.dart';
 import 'questionnaire_list_page.dart';
 import 'graph_page.dart';
 
@@ -9,9 +10,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
+    
   @override
   void initState() {
     super.initState();
@@ -19,41 +21,67 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // ❌ KEINE bottomNavigationBar -> kommt aus root_navigation.dart
-
-      body: SafeArea(
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+        title: Text(
+          "SomniLink",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.blue,
+        elevation: 6,
+      ),
+    // ❌ KEINE bottomNavigationBar -> kommt aus root_navigation.dart
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // zentriert vertikal
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ---------- TAB BAR ----------
-            Container(
-              color: Colors.blue.shade50,
-              child: TabBar(
-                controller: _tabController,
-                labelColor: Colors.blue,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.blue,
-                tabs: const [
-                  Tab(text: "Fragebögen"),
-                  Tab(text: "Graphen"),
-                ],
+            // ---------- Buttons ----------
+            const SizedBox(height: 100), // verschiebt die Buttons nach unten/in mitte
+            SizedBox(
+              height: 150,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const QuestionnaireListPage(),
+                    ),
+                  );
+                },
+                child: const Text("Daten Eingeben"),
               ),
             ),
-
-            // ---------- TAB CONTENT ----------
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const [
-                  QuestionnaireListPage(),
-                  HistoryPage(), // oder GraphPage()
-                ],
+            const SizedBox(height: 15), // für Abstand zwischen Buttons
+            SizedBox(
+              height: 150,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>  const DataSelectionPage(), // andere Seite
+                    ),
+                  );
+                },
+                child: const Text("Daten anzeigen"),
               ),
             ),
+            const SizedBox(height: 30),
+            // Hier kannst du weitere Widgets einfügen
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+    }

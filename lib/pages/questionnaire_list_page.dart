@@ -70,10 +70,18 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Fragebögen",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        title: Text(
+          "SomniLink",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.blue,
+        elevation: 6,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(12),

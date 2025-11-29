@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'root_navigation.dart';
 
 void main() {
-  runApp(const RlsApp());
+  runApp( RlsApp());
 }
 
 class RlsApp extends StatelessWidget {
@@ -17,9 +17,9 @@ class RlsApp extends StatelessWidget {
         colorSchemeSeed: Colors.blue,
         useMaterial3: true,
       ),
-      home: const RootNavigation(),
+      home:  RootNavigation(),
       routes: {
-        '/home': (context) => const RootNavigation(),
+        '/home': (context) =>  RootNavigation(),
       },
     );
   }

@@ -40,7 +40,18 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Einstellungen"),
+        title: Text(
+          "SomniLink",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.blue,
+        elevation: 6,
       ),
 
       body: ListView(

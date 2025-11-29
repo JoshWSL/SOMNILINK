@@ -53,7 +53,18 @@ class _ConsentPageState extends State<ConsentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Datenfreigabe für Arzt"),
+        title: Text(
+          "SomniLink",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.blue,
+        elevation: 6,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),

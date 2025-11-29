@@ -57,9 +57,8 @@ class _ProfilePageState extends State<ProfilePage> {
     await prefs.setString("medication", medication);
     await prefs.setString("severity", severity);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Profil gespeichert")),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Profil gespeichert")));
 
     setState(() {});
   }
@@ -77,18 +76,21 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text(title),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+          decoration: InputDecoration(border: OutlineInputBorder()),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text("Abbrechen")),
+            onPressed: () => Navigator.pop(context),
+            child: Text("Abbrechen"),
+          ),
           ElevatedButton(
-              onPressed: () {
-                onSave(controller.text);
-                saveProfile();
-                Navigator.pop(context);
-              },
-              child: const Text("Speichern")),
+            onPressed: () {
+              onSave(controller.text);
+              saveProfile();
+              Navigator.pop(context);
+            },
+            child: Text("Speichern"),
+          ),
         ],
       ),
     );
@@ -97,160 +99,170 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profil"),
+        title: Text(
+          "SomniLink",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.blue,
+        elevation: 6,
       ),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            // --------------------------------------------------------
-            // PROFILKOPF
-            // --------------------------------------------------------
-
-            Center(
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 45,
-                    backgroundColor: Colors.blue[200],
-                    child: const Icon(Icons.person, size: 50, color: Colors.white),
+                  // PROFILKOPF
+                  Center(
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 45,
+                          backgroundColor: Colors.blue[200],
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          name,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text("Patienten-ID: $patientId"),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
+
+                  SizedBox(height: 30),
+
+                  // PERSÖNLICHE DATEN
                   Text(
-                    name,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    "Persönliche Daten",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  Text("Patienten-ID: $patientId"),
+
+                  ListTile(
+                    title: Text("Name"),
+                    subtitle: Text(name),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => editField(
+                      title: "Name ändern",
+                      currentValue: name,
+                      onSave: (v) => setState(() => name = v),
+                    ),
+                  ),
+
+                  ListTile(
+                    title: Text("E-Mail"),
+                    subtitle: Text(email),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => editField(
+                      title: "E-Mail ändern",
+                      currentValue: email,
+                      onSave: (v) => setState(() => email = v),
+                    ),
+                  ),
+
+                  ListTile(
+                    title: Text("Patienten-ID"),
+                    subtitle: Text(patientId),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => editField(
+                      title: "Patienten-ID ändern",
+                      currentValue: patientId,
+                      onSave: (v) => setState(() => patientId = v),
+                    ),
+                  ),
+
+                  SizedBox(height: 20),
+                  Divider(),
+
+                  // MEDIZINISCHE DATEN
+                  SizedBox(height: 20),
+                  Text(
+                    "Medizinische Daten",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+
+                  ListTile(
+                    title: Text("Diagnose"),
+                    subtitle: Text(diagnosis),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => editField(
+                      title: "Diagnose ändern",
+                      currentValue: diagnosis,
+                      onSave: (v) => setState(() => diagnosis = v),
+                    ),
+                  ),
+
+                  ListTile(
+                    title: Text("Medikation"),
+                    subtitle: Text(medication),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => editField(
+                      title: "Medikamente bearbeiten",
+                      currentValue: medication,
+                      onSave: (v) => setState(() => medication = v),
+                    ),
+                  ),
+
+                  ListTile(
+                    title: Text("RLS-Schweregrad"),
+                    subtitle: Text(severity),
+                    trailing: Icon(Icons.edit),
+                    onTap: () => editField(
+                      title: "RLS-Schweregrad",
+                      currentValue: severity,
+                      onSave: (v) => setState(() => severity = v),
+                    ),
+                  ),
+
+                  SizedBox(height: 20),
+                  Divider(),
+
+                  // SYSTEMINFORMATIONEN
+                  SizedBox(height: 20),
+                  Text(
+                    "Systeminformationen",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+
+                  ListTile(
+                    leading: Icon(Icons.history),
+                    title: Text("Symptome dokumentiert"),
+                    subtitle: Text("$symptomCount Einträge"),
+                  ),
+
+                  ListTile(
+                    leading: Icon(Icons.verified_user),
+                    title: Text("Letzte Datenfreigabe"),
+                    subtitle: Text(lastConsent),
+                  ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 30),
-
-            // --------------------------------------------------------
-            // PERSÖNLICHE DATEN
-            // --------------------------------------------------------
-
-            const Text(
-              "Persönliche Daten",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            ListTile(
-              title: const Text("Name"),
-              subtitle: Text(name),
-              trailing: const Icon(Icons.edit),
-              onTap: () => editField(
-                title: "Name ändern",
-                currentValue: name,
-                onSave: (v) => setState(() => name = v),
-              ),
-            ),
-
-            ListTile(
-              title: const Text("E-Mail"),
-              subtitle: Text(email),
-              trailing: const Icon(Icons.edit),
-              onTap: () => editField(
-                title: "E-Mail ändern",
-                currentValue: email,
-                onSave: (v) => setState(() => email = v),
-              ),
-            ),
-
-            ListTile(
-              title: const Text("Patienten-ID"),
-              subtitle: Text(patientId),
-              trailing: const Icon(Icons.edit),
-              onTap: () => editField(
-                title: "Patienten-ID ändern",
-                currentValue: patientId,
-                onSave: (v) => setState(() => patientId = v),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            const Divider(),
-
-            // --------------------------------------------------------
-            // MEDIZINISCHE DATEN
-            // --------------------------------------------------------
-
-            const SizedBox(height: 20),
-            const Text(
-              "Medizinische Daten",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            ListTile(
-              title: const Text("Diagnose"),
-              subtitle: Text(diagnosis),
-              trailing: const Icon(Icons.edit),
-              onTap: () => editField(
-                title: "Diagnose ändern",
-                currentValue: diagnosis,
-                onSave: (v) => setState(() => diagnosis = v),
-              ),
-            ),
-
-            ListTile(
-              title: const Text("Medikation"),
-              subtitle: Text(medication),
-              trailing: const Icon(Icons.edit),
-              onTap: () => editField(
-                title: "Medikamente bearbeiten",
-                currentValue: medication,
-                onSave: (v) => setState(() => medication = v),
-              ),
-            ),
-
-            ListTile(
-              title: const Text("RLS-Schweregrad"),
-              subtitle: Text(severity),
-              trailing: const Icon(Icons.edit),
-              onTap: () => editField(
-                title: "RLS-Schweregrad",
-                currentValue: severity,
-                onSave: (v) => setState(() => severity = v),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            const Divider(),
-
-            // --------------------------------------------------------
-            // SYSTEMINFORMATIONEN
-            // --------------------------------------------------------
-
-            const SizedBox(height: 20),
-            const Text(
-              "Systeminformationen",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text("Symptome dokumentiert"),
-              subtitle: Text("$symptomCount Einträge"),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.verified_user),
-              title: const Text("Letzte Datenfreigabe"),
-              subtitle: Text(lastConsent),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

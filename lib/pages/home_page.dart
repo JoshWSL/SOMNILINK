@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rls_patient_app/pages/calendar_page.dart';
 import 'package:rls_patient_app/pages/data_selection_page.dart';
 import 'questionnaire_list_page.dart';
 import 'graph_page.dart';
@@ -54,7 +55,7 @@ Widget build(BuildContext context) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const QuestionnaireListPage(),
+                      builder: (_) => CalendarPage(),
                     ),
                   );
                 },
@@ -69,7 +70,7 @@ Widget build(BuildContext context) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>  const DataSelectionPage(), // andere Seite
+                      builder: (_) =>   DataSelectionPage(), // andere Seite
                     ),
                   );
                 },

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'root_navigation.dart';
+import 'services/api_service_dio.dart'; //Verbindung zu API Datei
 
 void main() {
+  ApiClient.init(); // Interceptor aktivieren
   runApp( RlsApp());
 }
 

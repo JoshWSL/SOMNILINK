@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:rls_patient_app/services/api_service.dart';
+import 'package:rls_patient_app/services/api_service_dio.dart';
 
 class ConsentPage extends StatefulWidget {
   const ConsentPage({super.key});
@@ -40,7 +40,7 @@ class _ConsentPageState extends State<ConsentPage> {
   }
 
   Future<void> _sendConsentToBackend() async {
-    final success = await ApiService.sendConsent(_consent);
+    final success = await ApiClient.sendConsent(_consent);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

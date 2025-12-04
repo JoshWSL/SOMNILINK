@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rls_patient_app/pages/calendar_page.dart';
 import 'package:rls_patient_app/pages/data_selection_page.dart';
-import 'questionnaire_list_page.dart';
-import 'graph_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

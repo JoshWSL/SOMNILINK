@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rls_patient_app/services/api_service.dart';
+import 'package:rls_patient_app/services/api_service_dio.dart';
+import 'package:rls_patient_app/services/api_service_http.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
@@ -9,7 +10,7 @@ class HistoryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Verlauf")),
       body: FutureBuilder(
-        future: ApiService.loadHistory(),
+        future: ApiClient.loadHistory(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

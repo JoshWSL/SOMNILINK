@@ -1,3 +1,7 @@
+
+// Wurde in DIO umgeschrieben, lass ich aber mal als backup noch drin
+
+/*
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -51,3 +55,5 @@ class ApiService {
     }
   }
 }
+
+*/

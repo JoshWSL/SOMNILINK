@@ -67,75 +67,92 @@ class FhirService {
     }
   }
 
-  // GET: Questionnaires für Patienten
-  Future<List<dynamic>> getQuestionnaires(String patientId) async {
+
+
+  // GET: Mental Health Questionnaire
+  Future<Map<String, dynamic>> getMentalHealthQuestionnaire() async {
     try {
-      final response = await dio.get(
-        "/questionnaire/",
-        queryParameters: {"patient": patientId},
-      );
-      return response.data as List<dynamic>;
+      final response = await dio.get("questionnaires/mental_health/");
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception("Fehler: ${response.statusCode}");
+      }
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception("Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
+        throw Exception("Server Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
       } else {
-        throw Exception("Netzwerkfehler: ${e.message}");
+        throw Exception("Netzwerk Fehler: ${e.message}");
       }
     }
   }
 
-  // POST: Questionnaire für Patienten
-  Future<Map<String, dynamic>> postQuestionnaire(String patientId, Map<String, dynamic> data) async {
+
+  // POST: Mental Health Questionnaire
+Future<Map<String, dynamic>> postMentalHealthAnswers(
+    String patientId,
+    Map<String, dynamic> data, // z.B. {"1":5,"2":3,"3":4,"4":2,"5":4}
+) async {
+  try {
+    final response = await dio.post(
+      "/questionnaireResponse/mental_health/", 
+      queryParameters: {"patient": patientId},
+      data: data,
+    );
+    return response.data;
+  } on DioException catch (e) {
+    if (e.response != null) {
+      throw Exception(
+          "Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
+    } else {
+      throw Exception("Netzwerkfehler: ${e.message}");
+    }
+  }
+}
+
+
+// GET: Sleep Score Questionnaire
+  Future<Map<String, dynamic>> getSleepScoreQuestionnaire() async {
     try {
-      final response = await dio.post(
-        "/questionnaire/",
-        queryParameters: {"patient": patientId},
-        data: data,
-      );
-      return response.data;
+      final response = await dio.get("questionnaires/rls_schlafscore/");
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception("Fehler: ${response.statusCode}");
+      }
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception("Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
+        throw Exception("Server Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
       } else {
-        throw Exception("Netzwerkfehler: ${e.message}");
+        throw Exception("Netzwerk Fehler: ${e.message}");
       }
     }
   }
 
-  // GET: QuestionnaireResponses für Patienten
-  Future<List<dynamic>> getQuestionnaireResponses(String patientId) async {
-    try {
-      final response = await dio.get(
-        "/questionnaireResponse/",
-        queryParameters: {"patient": patientId},
-      );
-      return response.data as List<dynamic>;
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception("Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
-      } else {
-        throw Exception("Netzwerkfehler: ${e.message}");
-      }
-    }
-  }
 
-  // POST: QuestionnaireResponse für Patienten
-  Future<Map<String, dynamic>> postQuestionnaireResponse(String patientId, Map<String, dynamic> data) async {
-    try {
-      final response = await dio.post(
-        "/questionnaireResponse/",
-        queryParameters: {"patient": patientId},
-        data: data,
-      );
-      return response.data;
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception("Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
-      } else {
-        throw Exception("Netzwerkfehler: ${e.message}");
-      }
+  // POST: Sleep Score Questionnaire
+Future<Map<String, dynamic>> postSleepScoreAnswers(
+    String patientId,
+    Map<String, dynamic> data, // z.B. {"1":5,"2":3,"3":4,"4":2,"5":4}
+) async {
+  try {
+    final response = await dio.post(
+      "/questionnaireResponse/rls_schlafscore/", 
+      queryParameters: {"patient": patientId},
+      data: data,
+    );
+    return response.data;
+  } on DioException catch (e) {
+    if (e.response != null) {
+      throw Exception(
+          "Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
+    } else {
+      throw Exception("Netzwerkfehler: ${e.message}");
     }
   }
+}
+
+  
 
   // GET: Consents für Patienten
   Future<List<dynamic>> getConsents(String patientId) async {

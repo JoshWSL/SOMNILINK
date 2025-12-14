@@ -51,7 +51,7 @@ class _CalendarPageState extends State<CalendarPage> {
             // Beim Klick auf einen Tag Seite öffnen
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => QuestionnaireListPage()),
+              MaterialPageRoute(builder: (_) => QuestionnaireListPage(selectedDate: selectedDay,)),
             );
           },
 

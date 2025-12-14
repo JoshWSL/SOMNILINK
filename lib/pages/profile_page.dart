@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rls_patient_app/models/patient.dart';
+import 'package:rls_patient_app/services/fhir_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -29,13 +32,32 @@ class _ProfilePageState extends State<ProfilePage> {
     loadProfile();
   }
 
-  Future<void> loadProfile() async {
-    final prefs = await SharedPreferences.getInstance();
+ Future<void> loadProfile() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  // Patient-ID lokal holen
+  patientId = prefs.getString("patientId") ?? "PID-0000";
+
+  try {
+    // Backend-Call
+    final fhirService = FhirService();
+    final json = await fhirService.getPatient(patientId);
+    final patient = Patient.fromJson(json);
 
     setState(() {
-      name = prefs.getString("name") ?? "Unbekannt";
+      name = patient.name;
+      severity = patient.gender; // Beispiel-Mapping
+      _loading = false;
+    });
+
+    // Optional: lokal cachen
+    await prefs.setString("name", name);
+
+  } catch (e) {
+    // Fallback auf lokale Daten
+    setState(() {
+      name = prefs.getString("name") ?? "Max Mustermann";
       email = prefs.getString("email") ?? "-";
-      patientId = prefs.getString("patientId") ?? "PID-0000";
       diagnosis = prefs.getString("diagnosis") ?? "RLS";
       medication = prefs.getString("medication") ?? "Keine Angaben";
       severity = prefs.getString("severity") ?? "Unbekannt";
@@ -46,6 +68,8 @@ class _ProfilePageState extends State<ProfilePage> {
       _loading = false;
     });
   }
+}
+
 
   Future<void> saveProfile() async {
     final prefs = await SharedPreferences.getInstance();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rls_patient_app/services/api_service_dio.dart';
-import 'package:rls_patient_app/services/api_service_http.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});

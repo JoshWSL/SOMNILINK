@@ -1,0 +1,36 @@
+name: rls_patient_app
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State Management ---
+  provider: ^6.1.2
+
+  # --- Charts & Utils ---
+  fl_chart: ^1.1.1
+  intl: ^0.20.2
+  table_calendar: ^3.2.0
+
+  # --- HTTP + Storage ---
+  shared_preferences: ^2.5.3
+  dio: ^5.9.0
+  http: ^1.2.2
+
+  # --- Design & UI ---
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

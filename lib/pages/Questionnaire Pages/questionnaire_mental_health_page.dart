@@ -14,7 +14,7 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
   bool isLoading = true;
   String? error;
 
-  // Map, um die Sliderwerte pro Frage zu speichern
+  // Map fpr saving the slider values
   Map<int, double> sliderValues = {};
 
   @override
@@ -27,14 +27,14 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
     try {
       final data = await questionnaireService.getMentalHealthQuestionnaire();
 
-      // Null-sichere Items-Liste
+     
       final items = (data['item'] as List<dynamic>?) ?? [];
 
       setState(() {
         questionnaire = data;
         isLoading = false;
 
-        // Initialisiere Sliderwerte auf 4 für jeden Eintrag
+        // sliders are initially on 4
         sliderValues = {for (int i = 0; i < items.length; i++) i: 4};
       });
     } catch (e) {
@@ -48,9 +48,9 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
-    final patientId = "123"; // Hier dynamisch setzen
+    final patientId = "123"; 
 
-    // Map für Backend: linkId -> integer Wert
+    // Map for backend
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
     Map<String, int> answers = {};
     for (int i = 0; i < items.length; i++) {
@@ -79,7 +79,7 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
     if (isLoading) return const Center(child: CircularProgressIndicator());
     if (error != null) return Center(child: Text("Fehler: $error"));
 
-    // Null-sicher die Items-Liste
+    // list with items from json
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
     final title = questionnaire?['title'] ?? "Fragebogen";
     final description = questionnaire?['description'] ?? "Fragebogen";
@@ -101,13 +101,13 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         child: Column(
           children: [
-            // Titel über den Slidern in der Mitte
+            // Title above the questions
             Text(
               title,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            // Beschreibung des Fragebogens
+            // description of the questionnaire
             Text(
               description,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -115,7 +115,7 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
             ),
             const SizedBox(height: 24),
 
-            // Flexible ListView für die Fragen
+            // flexible listView for questions
             Expanded(
               child: ListView.builder(
                 itemCount: items.length,
@@ -153,7 +153,7 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
               ),
             ),
 
-            // BUTTON zum Senden der Antworten
+            // Button to save the slider values in backend
             ElevatedButton(
               onPressed: submitAnswers,
               child: const Padding(

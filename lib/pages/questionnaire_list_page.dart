@@ -5,7 +5,7 @@ import 'package:rls_patient_app/services/fhir_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestionnaireListPage extends StatefulWidget {
-  final DateTime selectedDate; // Datum vom Kalender
+  final DateTime selectedDate;
 
   const QuestionnaireListPage({super.key, required this.selectedDate});
 
@@ -22,6 +22,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
     _loadQuestionnaires();
   }
 
+  // load questionnares from api
   Future<void> _loadQuestionnaires() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList("completed_questionnaires") ?? [];
@@ -34,8 +35,8 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
     final sleepScoreTitle = sleepScoreData['title'] ?? "Fragebogen";
 
 
-
-    final fakeData = [
+    // collection of the available questionnares
+    final questData = [
       {
         "id": "q1",
         "title": metalHealthTitle,
@@ -44,21 +45,21 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
         "id": "q2",
         "title": sleepScoreTitle,
       },
-
     ];
 
+    // save if questionnaire is filled an on which date
     setState(() {
-      questionnaires = fakeData
+      questionnaires = questData
           .map((q) => {
                 ...q,
                 "completed": saved.contains(q["id"]),
-                // Hier wird das Datum aus dem Kalender gesetzt
                 "date": widget.selectedDate,
               })
           .toList();
     });
   }
 
+  // save if a questionnaire is completet or not
   Future<void> _markCompleted(String id) async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList("completed_questionnaires") ?? [];
@@ -73,6 +74,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar (consistent for all pages)
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -95,6 +97,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
           final bool completed = item["completed"];
           final DateTime date = item["date"];
 
+          // List of all questionnaires that are able to fill out
           return Card(
             elevation: 2,
             margin: const EdgeInsets.symmetric(vertical: 8),
@@ -105,6 +108,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                 "Datum: ${date.day}.${date.month}.${date.year}",
                 style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
               ),
+              // coloured icon depending on completion status of the questionnare
               trailing: Icon(
                 completed ? Icons.check_circle : Icons.help,
                 color: completed ? Colors.green : Colors.amber,
@@ -115,6 +119,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                   await _markCompleted(item["id"]);
                 }
 
+                // information about the completion status of the chosen questionnaire
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -125,7 +130,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                   ),
                 );
 
-                // Navigation zu den entsprechenden Fragebogen-Seiten
+                // Navigation to the questionnares by taping the buttons
                 if (item["id"] == "q1") {
                   Navigator.push(
                     context,

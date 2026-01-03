@@ -26,6 +26,10 @@ class ApiClient {
 
   static Dio get instance => _dio;
 
+
+
+
+
   // Unterhalb alle Requests die die API an den Server schicken soll
 
   // ---------------- SEND SYMPTOM ----------------

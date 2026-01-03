@@ -1,14 +1,13 @@
 
 import 'package:flutter/material.dart';
 
-
-
 class DataSelectionPage extends StatelessWidget {
   const DataSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar (same for all pages)
       appBar: AppBar(
         title: Text(
           "SomniLink",
@@ -23,22 +22,24 @@ class DataSelectionPage extends StatelessWidget {
         backgroundColor: Colors.blue,
         elevation: 6,
       ),
+      // grid with 2 * 4 buttons for selection of the data that should be visualized
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: GridView.count(
-          crossAxisCount: 2, // 2 Buttons pro Reihe
+          crossAxisCount: 2, // 2 buttons in each row
           mainAxisSpacing: 15,
           crossAxisSpacing: 15,
-          childAspectRatio: 2, // Verhältnis Breite/Höhe der Buttons
-          children: List.generate(8, (index) {
+          childAspectRatio: 2, 
+          children: List.generate(8, (index) {  // generate 8 buttons in total
             return ElevatedButton(
+              // platzhalter für Funktion der buttons
               onPressed: () {
-                // Beispiel: Navigation oder Funktion
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Button ${index + 1} gedrückt")), // -> Hier Funktion zuordnen
+                  SnackBar(content: Text("Button ${index + 1} gedrückt")), 
                 );
               },
-              child: Text("Auswertung ${index + 1}"), // -> Hier benennen, was der jew. Button anzeigen soll
+              //Platzhalter für benennung der Buttons
+              child: Text("Auswertung ${index + 1}"),
             );
           }),
         ),

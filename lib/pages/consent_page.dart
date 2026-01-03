@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InfoPageRLS extends StatelessWidget {
   const InfoPageRLS({super.key});
@@ -6,9 +7,10 @@ class InfoPageRLS extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar (same for all pages)
       appBar: AppBar(
         title: const Text(
-          "Was ist RLS?",
+          "SomniLink",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -20,12 +22,12 @@ class InfoPageRLS extends StatelessWidget {
         elevation: 6,
       ),
 
+      // body with information about RLS
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             const SizedBox(height: 10),
 
             const Text(
@@ -101,13 +103,27 @@ class InfoPageRLS extends StatelessWidget {
             _infoBullet("Bewegung statt langes Sitzen"),
 
             const SizedBox(height: 40),
+            const Text(
+              "Weitere Informationen",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            GestureDetector(
+              onTap: _openRLSevWebsite,
+              child: const Text(
+                'Website des RLS e.V.',
+                style: TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // ------- Hilfsfunktion für Listenpunkte -------
+  // function for generating bullet points
   Widget _infoBullet(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -124,5 +140,17 @@ class InfoPageRLS extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// method that opens website link to the RLS e.v.
+Future<void> _openRLSevWebsite() async {
+  final uri = Uri.parse('https://www.restless-legs.org');
+
+  if (!await launchUrl(
+    uri,
+    mode: LaunchMode.externalApplication,
+  )) {
+    throw 'Konnte die URL nicht öffnen';
   }
 }

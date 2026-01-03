@@ -9,6 +9,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+// adding tab controller to choos the desired page
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -22,6 +23,7 @@ class _HomePageState extends State<HomePage>
   @override
 Widget build(BuildContext context) {
   return Scaffold(
+    // App bar (same for all pages)
     appBar: AppBar(
         title: Text(
           "SomniLink",
@@ -36,7 +38,7 @@ Widget build(BuildContext context) {
         backgroundColor: Colors.blue,
         elevation: 6,
       ),
-    // ❌ KEINE bottomNavigationBar -> kommt aus root_navigation.dart
+    // adding UI element for the data entry/visualisation buttons
     body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -44,7 +46,7 @@ Widget build(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.center, // zentriert vertikal
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ---------- Buttons ----------
+            // Button for data entry and data visualisation
             const SizedBox(height: 100), // verschiebt die Buttons nach unten/in mitte
             SizedBox(
               height: 150,
@@ -60,7 +62,7 @@ Widget build(BuildContext context) {
                 child: const Text("Daten Eingeben"),
               ),
             ),
-            const SizedBox(height: 15), // für Abstand zwischen Buttons
+            const SizedBox(height: 15),
             SizedBox(
               height: 150,
               child: ElevatedButton(
@@ -68,15 +70,13 @@ Widget build(BuildContext context) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>   DataSelectionPage(), // andere Seite
+                      builder: (_) =>   DataSelectionPage(),
                     ),
                   );
                 },
                 child: const Text("Daten anzeigen"),
               ),
             ),
-            const SizedBox(height: 30),
-            // Hier kannst du weitere Widgets einfügen
           ],
         ),
       ),

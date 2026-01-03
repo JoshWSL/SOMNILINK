@@ -13,12 +13,14 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _notifications = true;
 
+  // settings are reloaded each time the app is opened
   @override
   void initState() {
     super.initState();
     _loadSettings();
   }
 
+  // load settings of notification preferences,
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -26,6 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  // save settings of notification preferences 
   Future<void> _saveNotifications(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool("notifications", value);
@@ -35,7 +38,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
+    // Scaffold containing all UI elements of this page
     return Scaffold(
+      // App bar (consistent for all pages)
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -50,17 +55,19 @@ class _SettingsPageState extends State<SettingsPage> {
         elevation: 6,
       ),
 
+      // further UI elements are strucutred in a list view
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
 
+          // header for next section
           const SizedBox(height: 10),
           const Text(
             "App Einstellungen",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
 
-          // ----------- DARK MODE -----------
+          // Option to choose dark mode
           SwitchListTile(
             title: const Text("Dunkles Design"),
             subtitle: const Text("Schalte auf dunkles Farbschema um"),
@@ -68,10 +75,11 @@ class _SettingsPageState extends State<SettingsPage> {
             onChanged: (value) => themeProvider.toggleTheme(value),
           ),
 
-          // ----------- NOTIFICATIONS ----------
+          
+          // option to activate / deactivate notifications
           SwitchListTile(
             title: const Text("Benachrichtigungen"),
-            subtitle: const Text("Push-Hinweise für Symptome und Freigaben"),
+            subtitle: const Text("Push-Hinweise für Symptome und Fragebögen"),
             value: _notifications,
             onChanged: (value) {
               setState(() => _notifications = value);
@@ -79,21 +87,25 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
 
+          // items for page layout
           const SizedBox(height: 20),
           const Divider(),
-
           const SizedBox(height: 20),
+
+          // header for next section
           const Text(
             "Informationen",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
 
+          // Information about version of the App
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text("Über die App"),
             subtitle: const Text("Version 1.0 • RLS Projekt THU"),
           ),
 
+          // Infobox about data privacy, opens pop up with further information
           ListTile(
             leading: const Icon(Icons.health_and_safety),
             title: const Text("Datenschutz"),
@@ -118,6 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
 
+          //Option to reset all data in app -> opens pop up to confirm
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text("App zurücksetzen"),

@@ -16,6 +16,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar (same on all pages)
       appBar: AppBar(
         title: Text(
           "SomniLink",
@@ -30,6 +31,7 @@ class _CalendarPageState extends State<CalendarPage> {
         backgroundColor: Colors.blue,
         elevation: 6,
       ),
+      // Calender as UI element
       body: Center(
         child: TableCalendar(
           firstDay: DateTime.utc(2025, 1, 1),
@@ -37,18 +39,16 @@ class _CalendarPageState extends State<CalendarPage> {
           focusedDay: _focusedDay,
           calendarFormat: CalendarFormat.month,
 
-          // aktueller Tag automatisch markiert
+          // highlight current day
           selectedDayPredicate: (day) {
             return isSameDay(_selectedDay, day);
           },
-
+          // tappinng on one day opens the questionnares of this day
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
               _selectedDay = selectedDay;
               _focusedDay = focusedDay;
             });
-
-            // Beim Klick auf einen Tag Seite öffnen
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => QuestionnaireListPage(selectedDate: selectedDay,)),
@@ -59,11 +59,12 @@ class _CalendarPageState extends State<CalendarPage> {
             _focusedDay = focusedDay;
           },
 
+
+          // graphic setting of the calender
           headerStyle: HeaderStyle(
-            formatButtonVisible: false, // nur Monatswechsel
+            formatButtonVisible: false, 
             titleCentered: true,
           ),
-
           calendarStyle: CalendarStyle(
             todayDecoration: BoxDecoration(
               color: Colors.blue,

@@ -135,14 +135,14 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const MentalHealthPage()),
+                        builder: (context) => MentalHealthPage(selectedDate: item["date"])),
                   );
                 }
                 if (item["id"] == "q2") {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const SleepScorePage()),
+                        builder: (context) =>  SleepScorePage(selectedDate: item["date"])),
                   );
                 }
               },

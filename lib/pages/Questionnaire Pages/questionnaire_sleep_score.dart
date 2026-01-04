@@ -1,22 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:rls_patient_app/services/fhir_service.dart';
+import 'package:rls_patient_app/services/firely_service.dart';
 
 class SleepScorePage extends StatefulWidget {
-  const SleepScorePage({super.key});
+  final DateTime selectedDate; // Kalenderdatum übergeben
+
+  const SleepScorePage({super.key, required this.selectedDate});
 
   @override
-  State<SleepScorePage> createState() => _SleepScorePage();
+  State<SleepScorePage> createState() => _SleepScorePageState();
 }
 
-class _SleepScorePage extends State<SleepScorePage> {
+class _SleepScorePageState extends State<SleepScorePage> {
   final questionnaireService = FhirService();
   Map<String, dynamic>? questionnaire;
   bool isLoading = true;
   String? error;
 
-  // Map to save the slider values
+  // Map für die Slider-Werte
   Map<int, double> sliderValues = {};
 
+  //----------------------------------------------------------------------------------------------------
+  // create json for firely
+  Map<String, dynamic> buildQuestionnaireResponse(
+      String patientId,
+      Map<int, double> sliderValues,
+      DateTime authoredDate) {
+
+    final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
+
+    final responseItems = items.asMap().entries.map((entry) {
+      final index = entry.key;
+      final item = entry.value as Map<String, dynamic>;
+      final linkId = item['linkId'] ?? index.toString();
+      final value = sliderValues[index]?.round() ?? 0;
+
+      return {
+        "linkId": linkId,
+        "answer": [
+          {"valueInteger": value}
+        ]
+      };
+    }).toList();
+
+    return {
+      "resourceType": "QuestionnaireResponse",
+      "status": "completed",
+      "questionnaire": "Questionnaire/rls_schlafscore",
+      "subject": {"reference": "Patient/111"}, // Patient-ID ggf. dynamisch setzen
+      "authored": authoredDate.toUtc().toIso8601String(),
+      "item": responseItems
+    };
+  }
+
+  //----------------------------------------------------------------------------------------------------
   @override
   void initState() {
     super.initState();
@@ -27,14 +64,13 @@ class _SleepScorePage extends State<SleepScorePage> {
     try {
       final data = await questionnaireService.getSleepScoreQuestionnaire();
 
-      // items list
       final items = (data['item'] as List<dynamic>?) ?? [];
 
       setState(() {
         questionnaire = data;
         isLoading = false;
 
-        // slider values are initially on 4
+        // Slider initial auf 2
         sliderValues = {for (int i = 0; i < items.length; i++) i: 2};
       });
     } catch (e) {
@@ -45,28 +81,22 @@ class _SleepScorePage extends State<SleepScorePage> {
     }
   }
 
+  //----------------------------------------------------------------------------------------------------
+  // Antworten an Firely Server senden
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
-    final patientId = "123"; // patient id -> has to be dynamic
+    final patientId = "111"; // ggf. dynamisch
+    final firelyService = FirelyService();
 
-    // Map for Backend: linkId -> integer value
-    final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
-    Map<String, int> answers = {};
-    for (int i = 0; i < items.length; i++) {
-      final linkId = items[i]['linkId'] ?? i.toString();
-      answers[linkId] = sliderValues[i]?.round() ?? 0;
-    }
+    final response = buildQuestionnaireResponse(
+        patientId, sliderValues, widget.selectedDate);
 
     try {
-      final result =
-          await questionnaireService.postSleepScoreAnswers(patientId, answers);
-
+      await firelyService.postQuestionnaireResponse(response);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Antworten erfolgreich gesendet!")),
       );
-
-      print("POST Ergebnis: $result");
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Fehler beim Senden: $e")),
@@ -74,12 +104,12 @@ class _SleepScorePage extends State<SleepScorePage> {
     }
   }
 
+  //----------------------------------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: CircularProgressIndicator());
     if (error != null) return Center(child: Text("Fehler: $error"));
 
-  
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
     final title = questionnaire?['title'] ?? "Fragebogen";
     final description = questionnaire?['description'] ?? "Fragebogen";
@@ -101,28 +131,24 @@ class _SleepScorePage extends State<SleepScorePage> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         child: Column(
           children: [
-            // Title above the questions
             Text(
               title,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            // description of the questionnaire
             Text(
               description,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-
-            // felxible ListView for the questions
             Expanded(
               child: ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final q = items[index] as Map<String, dynamic>? ?? {};
                   final text = q['text'] ?? "Keine Frage verfügbar";
-                  final sliderValue = sliderValues[index] ?? 4;
+                  final sliderValue = sliderValues[index] ?? 2;
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -152,10 +178,8 @@ class _SleepScorePage extends State<SleepScorePage> {
                 },
               ),
             ),
-
-            // Button to save the questions in backend
             ElevatedButton(
-              onPressed: submitAnswers,
+              onPressed: submitAnswers, // ✅ Funktion korrekt referenziert
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 child: Text(

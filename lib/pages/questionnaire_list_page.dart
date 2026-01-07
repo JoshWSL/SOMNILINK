@@ -119,17 +119,6 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                   await _markCompleted(item["id"]);
                 }
 
-                // information about the completion status of the chosen questionnaire
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      completed
-                          ? "Bereits erledigt."
-                          : "Als erledigt markiert!",
-                    ),
-                  ),
-                );
-
                 // Navigation to the questionnares by taping the buttons
                 if (item["id"] == "q1") {
                   Navigator.push(

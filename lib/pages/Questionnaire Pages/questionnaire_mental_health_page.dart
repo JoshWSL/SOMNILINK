@@ -3,7 +3,7 @@ import 'package:rls_patient_app/services/fhir_service.dart';
 import 'package:rls_patient_app/services/firely_service.dart';
 
 class MentalHealthPage extends StatefulWidget {
-  final DateTime selectedDate; // Kalenderdatum übergeben
+  final DateTime selectedDate; // date from calender page
 
   const MentalHealthPage({super.key, required this.selectedDate});
 
@@ -17,11 +17,11 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
   bool isLoading = true;
   String? error;
 
-  // Map für die Slider-Werte
+  // map for slider values
   Map<int, double> sliderValues = {};
 
-  //----------------------------------------------------------------------------------------------------
-  // Erzeugt das JSON für den Firely Server
+
+  // generates jason that will be sent to firely server
   Map<String, dynamic> buildQuestionnaireResponse(
       String patientId,
       Map<int, double> sliderValues,
@@ -46,20 +46,20 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
     return {
       "resourceType": "QuestionnaireResponse",
       "status": "completed",
-      "questionnaire": "Questionnaire/mental_health", // muss vielleicht noch dynamisch gemacht werden
-      "subject": {"reference": "Patient/111"}, // Patient-ID anpassen
+      "questionnaire": "Questionnaire/mental_health", 
+      "subject": {"reference": "Patient/111"}, // will be dynamic later on
       "authored": authoredDate.toUtc().toIso8601String(),
       "item": responseItems
     };
   }
 
-  //----------------------------------------------------------------------------------------------------
   @override
   void initState() {
     super.initState();
     loadQuestionnaire();
   }
 
+  // quesstionares aus django backend laden
   Future<void> loadQuestionnaire() async {
     try {
       final data = await questionnaireService.getMentalHealthQuestionnaire();
@@ -79,8 +79,8 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
     }
   }
 
-  //----------------------------------------------------------------------------------------------------
-  // Senden der Antworten an den Firely Server
+
+  // Send answer to firely server
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
@@ -102,7 +102,7 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
     }
   }
 
-  //----------------------------------------------------------------------------------------------------
+  //UI section
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: CircularProgressIndicator());
@@ -177,7 +177,7 @@ class _MentalHealthPageState extends State<MentalHealthPage> {
               ),
             ),
             ElevatedButton(
-              onPressed: submitAnswers, // Funktion korrekt referenziert, ohne ()!
+              onPressed: submitAnswers,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 child: Text(

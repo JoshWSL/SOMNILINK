@@ -81,12 +81,12 @@ class _SleepScorePageState extends State<SleepScorePage> {
     }
   }
 
-  //----------------------------------------------------------------------------------------------------
-  // Antworten an Firely Server senden
+
+  // Send answers to Firely Server
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
-    final patientId = "111"; // ggf. dynamisch
+    final patientId = "111"; // will be dynamic later on
     final firelyService = FirelyService();
 
     final response = buildQuestionnaireResponse(
@@ -104,7 +104,7 @@ class _SleepScorePageState extends State<SleepScorePage> {
     }
   }
 
-  //----------------------------------------------------------------------------------------------------
+  // UI section
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: CircularProgressIndicator());
@@ -115,6 +115,7 @@ class _SleepScorePageState extends State<SleepScorePage> {
     final description = questionnaire?['description'] ?? "Fragebogen";
 
     return Scaffold(
+      // basic App bar (same on every page)
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -127,6 +128,7 @@ class _SleepScorePageState extends State<SleepScorePage> {
         backgroundColor: Colors.blue,
         elevation: 6,
       ),
+      //column with questions ans sliders
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         child: Column(
@@ -179,7 +181,7 @@ class _SleepScorePageState extends State<SleepScorePage> {
               ),
             ),
             ElevatedButton(
-              onPressed: submitAnswers, // ✅ Funktion korrekt referenziert
+              onPressed: submitAnswers,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 child: Text(

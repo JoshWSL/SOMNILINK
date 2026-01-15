@@ -27,10 +27,10 @@ class FhirService {
 
 
 
-  // GET: Mental Health Questionnaire
-  Future<Map<String, dynamic>> getMentalHealthQuestionnaire() async {
+// GET: IRLS Questionnaire
+  Future<Map<String, dynamic>> getIrlsQuestionnaire() async {
     try {
-      final response = await dio.get("questionnaires/mental_health/");
+      final response = await dio.get("questionnaires/IRLS/");
       if (response.statusCode == 200) {
         return response.data;
       } else {
@@ -45,12 +45,46 @@ class FhirService {
     }
   }
 
-
-
-// GET: Sleep Score Questionnaire
-  Future<Map<String, dynamic>> getSleepScoreQuestionnaire() async {
+  // GET: MHI-5 Questionnaire
+  Future<Map<String, dynamic>> getMhi5Questionnaire() async {
     try {
-      final response = await dio.get("questionnaires/rls_schlafscore/");
+      final response = await dio.get("questionnaires/MHI-5/");
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception("Fehler: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception("Server Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
+      } else {
+        throw Exception("Netzwerk Fehler: ${e.message}");
+      }
+    }
+  }
+
+    // GET: Tagebuch Questionnaire
+  Future<Map<String, dynamic>> getTagebuchQuestionnaire() async {
+    try {
+      final response = await dio.get("questionnaires/Tagebuch/");
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception("Fehler: ${response.statusCode}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception("Server Fehler: ${e.response!.statusCode} -> ${e.response!.data}");
+      } else {
+        throw Exception("Netzwerk Fehler: ${e.message}");
+      }
+    }
+  }
+
+      // GET: Tagebuch Questionnaire
+  Future<Map<String, dynamic>> getRls6Questionnaire() async {
+    try {
+      final response = await dio.get("questionnaires/RLS-6/");
       if (response.statusCode == 200) {
         return response.data;
       } else {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rls_patient_app/pages/Questionnaire%20Pages/questionnaire_mental_health_page.dart';
-import 'package:rls_patient_app/pages/Questionnaire%20Pages/questionnaire_sleep_score.dart';
+import 'package:rls_patient_app/pages/Questionnaire%20Pages/questionnaire_IRLS_page.dart';
+import 'package:rls_patient_app/pages/Questionnaire%20Pages/questionnaire_MHI5_page.dart';
+import 'package:rls_patient_app/pages/Questionnaire%20Pages/questionnaire_RLS6_page.dart';
+import 'package:rls_patient_app/pages/Questionnaire%20Pages/questionnaire_tagebuch_page.dart';
 import 'package:rls_patient_app/services/fhir_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,23 +30,39 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
     final saved = prefs.getStringList("completed_questionnaires") ?? [];
 
     final questionnaireService = FhirService();
-    final metalHealthData = await questionnaireService.getMentalHealthQuestionnaire();
-    final metalHealthTitle = metalHealthData['title'] ?? "Fragebogen";
+    
+    final tagebuchData = await questionnaireService.getTagebuchQuestionnaire();
+    final tagebuchTitle = tagebuchData['title'] ?? "Fragebogen";
+        
+    final irlsData = await questionnaireService.getIrlsQuestionnaire();
+    final irlsTitle = irlsData['title'] ?? "Fragebogen";
 
-    final sleepScoreData = await questionnaireService.getSleepScoreQuestionnaire();
-    final sleepScoreTitle = sleepScoreData['title'] ?? "Fragebogen";
+    final mhi5Data = await questionnaireService.getMhi5Questionnaire();
+    final mhi5Title = mhi5Data['title'] ?? "Fragebogen";
 
+    final rls6Data = await questionnaireService.getRls6Questionnaire();
+    final rls6Title = rls6Data['title'] ?? "Fragebogen";
+    
+    
 
     // collection of the available questionnares
     final questData = [
       {
         "id": "q1",
-        "title": metalHealthTitle,
+        "title": tagebuchTitle,
       },
       {
         "id": "q2",
-        "title": sleepScoreTitle,
+        "title": irlsTitle,
       },
+      {
+        "id": "q3",
+        "title": mhi5Title,
+      },
+      {
+        "id": "q4",
+        "title": rls6Title,
+      }
     ];
 
     // save if questionnaire is filled an on which date
@@ -124,14 +142,28 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => MentalHealthPage(selectedDate: item["date"])),
+                        builder: (context) => TagebuchPage(selectedDate: item["date"])),
                   );
                 }
                 if (item["id"] == "q2") {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>  SleepScorePage(selectedDate: item["date"])),
+                        builder: (context) =>  IrlsPage(selectedDate: item["date"])),
+                  );
+                }
+                if (item["id"] == "q3") {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>  Mhi5Page(selectedDate: item["date"])),
+                  );
+                }
+                if (item["id"] == "q4") {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>  Rls6Page(selectedDate: item["date"])),
                   );
                 }
               },

@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 class ApiClient {
   static final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "http://127.0.0.1:8000/api/",  // URL für Backend
+      baseUrl: "http://127.0.0.1:8000//api/",  // URL für Backend (!!!! lokaler PC muss für VM geändert werden !!!!!!)
       connectTimeout: const Duration(seconds: 10),  // Timeout wird ab 10s mit Fehler abgefangen 
       receiveTimeout: const Duration(seconds: 10),  
       contentType: "application/json",  // Daten werden als JSON gesendet / empfangen

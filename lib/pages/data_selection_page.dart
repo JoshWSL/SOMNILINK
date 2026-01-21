@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:rls_patient_app/pages/Data%20Visualization/visualize_mental_health_page.dart';
-import 'package:rls_patient_app/pages/Data%20Visualization/visualize_sleep_score_page.dart';
+import 'package:rls_patient_app/pages/Data%20Visualization/visualize_IRLS_page.dart';
+import 'package:rls_patient_app/pages/Data%20Visualization/visualize_MHI5_page.dart';
+import 'package:rls_patient_app/pages/Data%20Visualization/visualize_RLS6_page.dart';
+import 'package:rls_patient_app/pages/Data%20Visualization/calendar_tagebuch_page.dart';
+
+// The IRLS Score is calculated by summing the value from each question up
+// The questions range from 0 (good) to 4 (bad) -> a higher score equals a worse state of the patient
 
 class DataSelectionPage extends StatelessWidget {
   const DataSelectionPage({super.key});
@@ -22,7 +27,7 @@ class DataSelectionPage extends StatelessWidget {
         backgroundColor: Colors.blue,
         elevation: 6,
       ),
-      // Grid with 4*2 Buttons containing the charts
+      // Grid with 2*2 Buttons containing the charts
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: GridView.count(
@@ -32,72 +37,56 @@ class DataSelectionPage extends StatelessWidget {
           childAspectRatio: 2,
           children: [
 
-            // Button for navigate to Mental Healt Line chart
+            // Button for navigate to tagebuch date selection
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const VisualizeMentalHealthPage(),
+                    builder: (_) => const CalendarTagebuchPage(),
                   ),
                 );
               },
-              child: const Text("Mentale Gesundheit"),
+              child: const Text("Tagebuch"),
             ),
 
-            // Button for navigate to Sleep score chart
+            // Button for navigate to IRLS Score visualization
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const VisualizeSleepScorePage(),
+                    builder: (_) => const VisualizeIrlsPage(),
                   ),
                 );
               },
-              child: const Text("Schlafqualität"),
+              child: const Text("Symptomverlauf Allgemein\n(IRLS)", textAlign: TextAlign.center),
             ),
 
-            // ---------------------- Button 3 ----------------------
+            // Button for navigate to MHI5 Score visualization
             ElevatedButton(
               onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const VisualizeMhi5Page(),
+                  ),
+                );
               },
-              child: const Text("tbd"),
+              child: const Text("Persönliches Wohbefinden \n(MHI-5)", textAlign: TextAlign.center),
             ),
 
-            // ---------------------- Button 4 ----------------------
+            // Button for navigate to RLS-6 Score visualization
             ElevatedButton(
               onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const VisualizeRls6Page(),
+                  ),
+                );
               },
-              child: const Text("tbd"),
-            ),
-
-            // ---------------------- Button 5 ----------------------
-            ElevatedButton(
-              onPressed: () {
-              },
-              child: const Text("tbd"),
-            ),
-
-            // ---------------------- Button 6 ----------------------
-            ElevatedButton(
-              onPressed: () {
-              },
-              child: const Text("tbd"),
-            ),
-
-            // ---------------------- Button 7 ----------------------
-            ElevatedButton(
-              onPressed: () {
-              },
-              child: const Text("tbd"),
-            ),
-
-            // ---------------------- Button 8 ----------------------
-            ElevatedButton(
-              onPressed: () {
-              },
-              child: const Text("tbd"),
+              child: const Text("Zufriedenheit/Müdigkeit \n(RLS-6)", textAlign: TextAlign.center),
             ),
           ],
         ),

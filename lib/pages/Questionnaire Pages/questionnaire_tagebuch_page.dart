@@ -18,7 +18,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
   bool isLoading = true;
   String? error;
 
-  Map<String, String> answers = {}; // für integer und time HH:mm
+  Map<String, String> answers = {}; // für integer und time HH:mm:ss
 
   @override
   void initState() {
@@ -26,6 +26,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
     loadQuestionnaire();
   }
 
+  // load tagebuch from django backend (tagebuch is trated in backend same like a questionnire)
   Future<void> loadQuestionnaire() async {
     try {
       final data = await questionnaireService.getTagebuchQuestionnaire();
@@ -35,7 +36,6 @@ class _TagebuchPageState extends State<TagebuchPage> {
         questionnaire = data;
         isLoading = false;
 
-        // initialisiere Antworten
         for (var item in items) {
           if (item['type'] == 'group') {
             for (var sub in (item['item'] as List<dynamic>)) {
@@ -54,6 +54,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
     }
   }
 
+  // create a FHIR-ressource that can be send to the Firely-Server
   Map<String, dynamic> buildQuestionnaireResponse(
       String patientId, Map<String, String> answers, DateTime authoredDate) {
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
@@ -119,6 +120,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
     };
   }
 
+ // Procedure for submitting the answers to the firely server as soon as the button is tapped
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
@@ -140,7 +142,6 @@ class _TagebuchPageState extends State<TagebuchPage> {
   }
 
   Widget buildItemRow(Map<String, dynamic> item) {
-    // Gruppe
     if (item['type'] == 'group') {
       final subItems = (item['item'] as List<dynamic>).cast<Map<String, dynamic>>();
       return Column(
@@ -149,16 +150,15 @@ class _TagebuchPageState extends State<TagebuchPage> {
           const SizedBox(height: 16),
           Text(item['text'], style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          if (item['linkId'] == '5') // Erklärung über Schlafstörungen
+          if (item['linkId'] == '5')
             const Padding(
               padding: EdgeInsets.only(bottom: 8.0),
             ),
-          ...subItems.map((sub) => buildItemRow(sub)).toList(),
+          ...subItems.map((sub) => buildItemRow(sub)),
         ],
       );
     }
 
-    // Integer-Feld
     if (item['type'] == 'integer') {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -186,7 +186,6 @@ class _TagebuchPageState extends State<TagebuchPage> {
       );
     }
 
-    // Time-Feld: Einfach direkt eintippen
     if (item['type'] == 'time') {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -201,7 +200,8 @@ class _TagebuchPageState extends State<TagebuchPage> {
                   FilteringTextInputFormatter.allow(RegExp(r'[\d:]'))
                 ],
                 decoration: const InputDecoration(
-                  hintText: 'HH:mm',
+                  // format is relevant to be savable in firely server
+                  hintText: 'HH:mm:ss',
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                 ),
@@ -220,6 +220,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
     return const SizedBox.shrink();
   }
 
+  // Build UI elements that are not already biuld in the upper section
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: CircularProgressIndicator());
@@ -230,6 +231,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
     final description = questionnaire?['description'] ?? "Fragebogen";
 
     return Scaffold(
+      // generic app bar
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -263,6 +265,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
                 children: items.map((item) => buildItemRow(item as Map<String, dynamic>)).toList(),
               ),
             ),
+            // Button to submit answers to firely-server
             ElevatedButton(
               onPressed: submitAnswers,
               child: const Padding(

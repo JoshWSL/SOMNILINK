@@ -17,8 +17,11 @@ class _Mhi5PageState extends State<Mhi5Page> {
   bool isLoading = true;
   String? error;
 
-  // Map für Slider-Werte: LinkId als Key, double als Wert für den Slider
+  // Map to save the slider values (pure, not inverted)
   Map<String, double> sliderValues = {};
+
+  // for MHI-5 there is a need to invert some answer values 
+  final Set<String> invertedQuestions = {'c', 'e'};
 
   @override
   void initState() {
@@ -26,29 +29,28 @@ class _Mhi5PageState extends State<Mhi5Page> {
     loadQuestionnaire();
   }
 
-  /// Extrahiert die Fragen aus der FHIR-Struktur (beachtet die 'group')
+  /// Extrahiert Fragen (beachtet optionale group-Kapselung)
   List<dynamic> _getQuestions() {
     if (questionnaire == null) return [];
     final items = questionnaire!['item'] as List<dynamic>? ?? [];
-    
-    // Da MHI-5 oft in einer Gruppe "mhi5" gekapselt ist:
+
     if (items.isNotEmpty && items[0]['type'] == 'group') {
       return items[0]['item'] as List<dynamic>? ?? [];
     }
     return items;
   }
 
+  // Method to load MHI-5 from django backend  / catching exeptions for several errors that might occur
   Future<void> loadQuestionnaire() async {
     try {
       final data = await questionnaireService.getMhi5Questionnaire();
       setState(() {
         questionnaire = data;
         final questions = _getQuestions();
-        
-        // Initialwert auf 4 (Manchmal) für jede Frage setzen
         sliderValues = {
           for (var q in questions) q['linkId'].toString(): 4.0
         };
+
         isLoading = false;
       });
     } catch (e) {
@@ -59,21 +61,33 @@ class _Mhi5PageState extends State<Mhi5Page> {
     }
   }
 
+  // encode/inverse slider values of question c and e
+  int _encodeMhi5Value(String linkId, int rawValue) {
+    if (invertedQuestions.contains(linkId)) {
+      return 7 - rawValue;
+    }
+    return rawValue;
+  }
+
+  // create a FHIR-ressource that can be send to the Firely-Server
   Map<String, dynamic> buildQuestionnaireResponse(
-      String patientId,
-      Map<String, double> sliderValues,
-      DateTime authoredDate) {
-    
+    String patientId,
+    Map<String, double> sliderValues,
+    DateTime authoredDate,
+  ) {
     final questions = _getQuestions();
 
     final responseItems = questions.map((item) {
-      final linkId = item['linkId'];
-      final value = sliderValues[linkId]?.round() ?? 4;
+      final String linkId = item['linkId'].toString();
+      final int rawValue = sliderValues[linkId]?.round() ?? 4;
+
+      // save encoded value
+      final int encodedValue = _encodeMhi5Value(linkId, rawValue);
 
       return {
         "linkId": linkId,
         "answer": [
-          {"valueInteger": value}
+          {"valueInteger": encodedValue}
         ]
       };
     }).toList();
@@ -82,18 +96,20 @@ class _Mhi5PageState extends State<Mhi5Page> {
       "resourceType": "QuestionnaireResponse",
       "status": "completed",
       "questionnaire": "Questionnaire/MHI-5",
-      "subject": {"reference": "Patient/111"},
+      "subject": {"reference": "Patient/$patientId"},
       "authored": authoredDate.toUtc().toIso8601String(),
       "item": responseItems
     };
   }
 
+  // Procedure for submitting the answers to the firely server as soon as the button is tapped
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
     final patientId = "111";
     final firelyService = FirelyService();
-    final response = buildQuestionnaireResponse(patientId, sliderValues, widget.selectedDate);
+    final response =
+        buildQuestionnaireResponse(patientId, sliderValues, widget.selectedDate);
 
     try {
       await firelyService.postQuestionnaireResponse(response);
@@ -107,10 +123,20 @@ class _Mhi5PageState extends State<Mhi5Page> {
     }
   }
 
+ // Display the Questionnaire with appropriate UI elements
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (error != null) return Scaffold(body: Center(child: Text("Fehler: $error")));
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (error != null) {
+      return Scaffold(
+        body: Center(child: Text("Fehler: $error")),
+      );
+    }
 
     final questions = _getQuestions();
     final title = questionnaire?['title'] ?? "MHI-5 Fragebogen";
@@ -132,9 +158,23 @@ class _Mhi5PageState extends State<Mhi5Page> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 8),
-                Text(description, style: const TextStyle(fontSize: 15, color: Colors.grey), textAlign: TextAlign.center),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -144,20 +184,28 @@ class _Mhi5PageState extends State<Mhi5Page> {
               itemCount: questions.length,
               itemBuilder: (context, index) {
                 final q = questions[index];
-                final linkId = q['linkId'];
+                final linkId = q['linkId'].toString();
                 final text = q['text'] ?? "";
                 final currentVal = sliderValues[linkId] ?? 4.0;
                 final options = q['answerOption'] as List<dynamic>? ?? [];
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(
+                          text,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         Slider(
                           value: currentVal,
@@ -168,15 +216,19 @@ class _Mhi5PageState extends State<Mhi5Page> {
                             setState(() => sliderValues[linkId] = value);
                           },
                         ),
-                        // Dynamische Beschriftung unter dem Slider
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
                             children: options.map((opt) {
-                              final code = opt['valueCoding']['code'].toString();
-                              final display = opt['valueCoding']['display'].toString();
-                              final isSelected = code == currentVal.round().toString();
+                              final code =
+                                  opt['valueCoding']['code'].toString();
+                              final display =
+                                  opt['valueCoding']['display'].toString();
+                              final isSelected =
+                                  code == currentVal.round().toString();
 
                               return Expanded(
                                 child: Text(
@@ -184,8 +236,12 @@ class _Mhi5PageState extends State<Mhi5Page> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 9,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                    color: isSelected ? Colors.blue : Colors.black54,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? Colors.blue
+                                        : Colors.black54,
                                   ),
                                 ),
                               );
@@ -199,12 +255,16 @@ class _Mhi5PageState extends State<Mhi5Page> {
               },
             ),
           ),
+          // Button to submit answers
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: submitAnswers,
               child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding: EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 child: Text(
                   "Antworten senden",
                   style: TextStyle(fontSize: 16),

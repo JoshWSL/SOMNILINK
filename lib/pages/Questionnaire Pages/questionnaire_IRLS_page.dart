@@ -25,6 +25,8 @@ class _IrlsPageState extends State<IrlsPage> {
     loadQuestionnaire();
   }
 
+
+  // Method to load IRLS from django backend  / catching exeptions for several errors that might occur
   Future<void> loadQuestionnaire() async {
     try {
       final data = await questionnaireService.getIrlsQuestionnaire();
@@ -43,6 +45,7 @@ class _IrlsPageState extends State<IrlsPage> {
     }
   }
 
+  // create a FHIR-ressource that can be send to the Firely-Server
   Map<String, dynamic> buildQuestionnaireResponse(
       String patientId, Map<int, double> sliderValues, DateTime authoredDate) {
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
@@ -71,6 +74,7 @@ class _IrlsPageState extends State<IrlsPage> {
     };
   }
 
+  // Procedure for submitting the answers to the firely server as soon as the button is tapped
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
@@ -92,19 +96,22 @@ class _IrlsPageState extends State<IrlsPage> {
     }
   }
 
+  // Display the Questionnaire with appropriate UI elements
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     if (error != null) return Scaffold(body: Center(child: Text("Fehler: $error")));
 
+   
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
     final title = questionnaire?['title'] ?? "IRLS Fragebogen";
     final description = questionnaire?['description'] ?? "";
 
-    // Beschriftungen für die Slider
+    // description of the slider
     final sliderLabels = ["Nicht vorhanden", "Leicht", "Mäßig", "Ziemlich", "Sehr"];
 
     return Scaffold(
+      // gneric app bar
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -155,7 +162,6 @@ class _IrlsPageState extends State<IrlsPage> {
                             setState(() => sliderValues[index] = value);
                           },
                         ),
-                        // Labels unter dem Slider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: Row(
@@ -183,6 +189,7 @@ class _IrlsPageState extends State<IrlsPage> {
               },
             ),
           ),
+          // Button to submit answers
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(

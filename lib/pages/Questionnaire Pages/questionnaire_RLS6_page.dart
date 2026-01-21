@@ -17,6 +17,7 @@ class _Rls6PageState extends State<Rls6Page> {
   bool isLoading = true;
   String? error;
 
+  // Map to save the slider values
   Map<String, double> sliderValues = {};
 
   @override
@@ -25,6 +26,7 @@ class _Rls6PageState extends State<Rls6Page> {
     loadQuestionnaire();
   }
 
+  // Method to load RLS-6 from django backend  / catching exeptions for several errors that might occur
   Future<void> loadQuestionnaire() async {
     try {
       final data = await questionnaireService.getRls6Questionnaire();
@@ -53,6 +55,7 @@ class _Rls6PageState extends State<Rls6Page> {
     }
   }
 
+  // create a FHIR-ressource that can be send to the Firely-Server
   Map<String, dynamic> buildQuestionnaireResponse(
       String patientId, Map<String, double> sliderValues, DateTime authoredDate) {
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
@@ -94,6 +97,7 @@ class _Rls6PageState extends State<Rls6Page> {
     };
   }
 
+  // Procedure for submitting the answers to the firely server as soon as the button is tapped
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
@@ -113,7 +117,7 @@ class _Rls6PageState extends State<Rls6Page> {
     }
   }
 
-  // Hilfsfunktion: Beschriftungen links/rechts des Sliders
+  // description only on beginning and end of slider -> see questionnaire sources of the report
   Map<String, String> getSliderBounds(String linkId) {
     switch (linkId) {
       case '1':
@@ -130,6 +134,7 @@ class _Rls6PageState extends State<Rls6Page> {
     }
   }
 
+  // Build row with questionnare answers
   Widget buildItemRow(Map<String, dynamic> item, {double indent = 0}) {
     if (item['type'] == 'group') {
       final subItems = (item['item'] as List<dynamic>).cast<Map<String, dynamic>>();
@@ -140,7 +145,7 @@ class _Rls6PageState extends State<Rls6Page> {
           children: [
             Text(item['text'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
-            ...subItems.map((sub) => buildItemRow(sub, indent: indent + 16)).toList(),
+            ...subItems.map((sub) => buildItemRow(sub, indent: indent + 16)),
           ],
         ),
       );
@@ -180,6 +185,7 @@ class _Rls6PageState extends State<Rls6Page> {
     );
   }
 
+  // Biuld UI elments that are not already implemented in the upper section
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: CircularProgressIndicator());
@@ -212,6 +218,7 @@ class _Rls6PageState extends State<Rls6Page> {
                 children: items.map((item) => buildItemRow(item as Map<String, dynamic>)).toList(),
               ),
             ),
+            // Button to submit answers 
             ElevatedButton(
               onPressed: submitAnswers,
               child: const Padding(

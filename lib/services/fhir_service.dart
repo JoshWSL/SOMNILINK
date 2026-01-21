@@ -81,7 +81,7 @@ class FhirService {
     }
   }
 
-      // GET: Tagebuch Questionnaire
+      // GET: RLS-6 Questionnaire
   Future<Map<String, dynamic>> getRls6Questionnaire() async {
     try {
       final response = await dio.get("questionnaires/RLS-6/");

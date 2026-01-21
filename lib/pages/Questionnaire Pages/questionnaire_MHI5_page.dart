@@ -122,6 +122,7 @@ class _Mhi5PageState extends State<Mhi5Page> {
           "SomniLink",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        centerTitle: true,
         backgroundColor: Colors.blue,
         elevation: 4,
       ),

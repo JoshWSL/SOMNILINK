@@ -3,7 +3,7 @@ import 'package:rls_patient_app/services/fhir_service.dart';
 import 'package:rls_patient_app/services/firely_service.dart';
 
 class IrlsPage extends StatefulWidget {
-  final DateTime selectedDate; // date from calender page
+  final DateTime selectedDate;
 
   const IrlsPage({super.key, required this.selectedDate});
 
@@ -17,16 +17,34 @@ class _IrlsPageState extends State<IrlsPage> {
   bool isLoading = true;
   String? error;
 
-  // map for slider values
   Map<int, double> sliderValues = {};
 
+  @override
+  void initState() {
+    super.initState();
+    loadQuestionnaire();
+  }
 
-  // generates jason that will be sent to firely server
+  Future<void> loadQuestionnaire() async {
+    try {
+      final data = await questionnaireService.getIrlsQuestionnaire();
+      final items = (data['item'] as List<dynamic>?) ?? [];
+
+      setState(() {
+        questionnaire = data;
+        isLoading = false;
+        sliderValues = {for (int i = 0; i < items.length; i++) i: 2.0};
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
   Map<String, dynamic> buildQuestionnaireResponse(
-      String patientId,
-      Map<int, double> sliderValues,
-      DateTime authoredDate) {
-
+      String patientId, Map<int, double> sliderValues, DateTime authoredDate) {
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
 
     final responseItems = items.asMap().entries.map((entry) {
@@ -46,41 +64,13 @@ class _IrlsPageState extends State<IrlsPage> {
     return {
       "resourceType": "QuestionnaireResponse",
       "status": "completed",
-      "questionnaire": "Questionnaire/IRLS", 
-      "subject": {"reference": "Patient/111"}, // will be dynamic later on
+      "questionnaire": "Questionnaire/IRLS",
+      "subject": {"reference": "Patient/111"},
       "authored": authoredDate.toUtc().toIso8601String(),
       "item": responseItems
     };
   }
 
-  @override
-  void initState() {
-    super.initState();
-    loadQuestionnaire();
-  }
-
-  // questionaires aus django backend laden
-  Future<void> loadQuestionnaire() async {
-    try {
-      final data = await questionnaireService.getIrlsQuestionnaire();
-      final items = (data['item'] as List<dynamic>?) ?? [];
-
-      setState(() {
-        questionnaire = data;
-        isLoading = false;
-        // Slider initial auf 4
-        sliderValues = {for (int i = 0; i < items.length; i++) i: 4};
-      });
-    } catch (e) {
-      setState(() {
-        error = e.toString();
-        isLoading = false;
-      });
-    }
-  }
-
-
-  // Send answer to firely server
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
@@ -102,81 +92,100 @@ class _IrlsPageState extends State<IrlsPage> {
     }
   }
 
-  //UI section
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Center(child: CircularProgressIndicator());
-    if (error != null) return Center(child: Text("Fehler: $error"));
+    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (error != null) return Scaffold(body: Center(child: Text("Fehler: $error")));
 
     final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
-    final title = questionnaire?['title'] ?? "Fragebogen";
-    final description = questionnaire?['description'] ?? "Fragebogen";
+    final title = questionnaire?['title'] ?? "IRLS Fragebogen";
+    final description = questionnaire?['description'] ?? "";
+
+    // Beschriftungen für die Slider
+    final sliderLabels = ["Nicht vorhanden", "Leicht", "Mäßig", "Ziemlich", "Sehr"];
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "SomniLink",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        centerTitle: true,
         backgroundColor: Colors.blue,
-        elevation: 6,
+        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                Text(description, style: const TextStyle(fontSize: 15, color: Colors.grey), textAlign: TextAlign.center),
+              ],
             ),
-            Text(
-              description,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final q = items[index] as Map<String, dynamic>? ?? {};
-                  final text = q['text'] ?? "Keine Frage verfügbar";
-                  final sliderValue = sliderValues[index] ?? 4;
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final q = items[index] as Map<String, dynamic>;
+                final text = q['text'] ?? "";
+                final currentVal = sliderValues[index] ?? 2.0;
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          text,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
-                          textAlign: TextAlign.left,
-                        ),
+                        Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 16),
                         Slider(
-                          value: sliderValue,
+                          value: currentVal,
                           min: 0,
-                          max: 8,
-                          divisions: 8,
-                          label: sliderValue.round().toString(),
+                          max: 4,
+                          divisions: 4,
+                          label: sliderLabels[currentVal.round()],
                           onChanged: (value) {
-                            setState(() {
-                              sliderValues[index] = value;
-                            });
+                            setState(() => sliderValues[index] = value);
                           },
+                        ),
+                        // Labels unter dem Slider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(sliderLabels.length, (i) {
+                              final isSelected = i == currentVal.round();
+                              return Expanded(
+                                child: Text(
+                                  sliderLabels[i],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? Colors.blue : Colors.black54,
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-            ElevatedButton(
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
               onPressed: submitAnswers,
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -186,8 +195,8 @@ class _IrlsPageState extends State<IrlsPage> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

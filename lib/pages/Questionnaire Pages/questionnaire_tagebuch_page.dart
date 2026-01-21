@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rls_patient_app/services/fhir_service.dart';
 import 'package:rls_patient_app/services/firely_service.dart';
 
 class TagebuchPage extends StatefulWidget {
-  final DateTime selectedDate; // date from calender page
+  final DateTime selectedDate;
 
   const TagebuchPage({super.key, required this.selectedDate});
 
@@ -17,41 +18,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
   bool isLoading = true;
   String? error;
 
-  // map for slider values
-  Map<int, double> sliderValues = {};
-
-
-  // generates jason that will be sent to firely server
-  Map<String, dynamic> buildQuestionnaireResponse(
-      String patientId,
-      Map<int, double> sliderValues,
-      DateTime authoredDate) {
-
-    final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
-
-    final responseItems = items.asMap().entries.map((entry) {
-      final index = entry.key;
-      final item = entry.value as Map<String, dynamic>;
-      final linkId = item['linkId'] ?? index.toString();
-      final value = sliderValues[index]?.round() ?? 0;
-
-      return {
-        "linkId": linkId,
-        "answer": [
-          {"valueInteger": value}
-        ]
-      };
-    }).toList();
-
-    return {
-      "resourceType": "QuestionnaireResponse",
-      "status": "completed",
-      "questionnaire": "Questionnaire/Tagebuch", 
-      "subject": {"reference": "Patient/111"}, // will be dynamic later on
-      "authored": authoredDate.toUtc().toIso8601String(),
-      "item": responseItems
-    };
-  }
+  Map<String, String> answers = {}; // für integer und time HH:mm
 
   @override
   void initState() {
@@ -59,7 +26,6 @@ class _TagebuchPageState extends State<TagebuchPage> {
     loadQuestionnaire();
   }
 
-  // questionaires aus django backend laden
   Future<void> loadQuestionnaire() async {
     try {
       final data = await questionnaireService.getTagebuchQuestionnaire();
@@ -68,8 +34,17 @@ class _TagebuchPageState extends State<TagebuchPage> {
       setState(() {
         questionnaire = data;
         isLoading = false;
-        // Slider initial auf 4
-        sliderValues = {for (int i = 0; i < items.length; i++) i: 4};
+
+        // initialisiere Antworten
+        for (var item in items) {
+          if (item['type'] == 'group') {
+            for (var sub in (item['item'] as List<dynamic>)) {
+              answers[sub['linkId']] = '';
+            }
+          } else {
+            answers[item['linkId']] = '';
+          }
+        }
       });
     } catch (e) {
       setState(() {
@@ -79,16 +54,78 @@ class _TagebuchPageState extends State<TagebuchPage> {
     }
   }
 
+  Map<String, dynamic> buildQuestionnaireResponse(
+      String patientId, Map<String, String> answers, DateTime authoredDate) {
+    final items = (questionnaire?['item'] as List<dynamic>?) ?? [];
 
-  // Send answer to firely server
+    List<Map<String, dynamic>> responseItems = [];
+
+    for (var item in items) {
+      if (item['type'] == 'group') {
+        List<Map<String, dynamic>> subItems = [];
+        for (var sub in item['item']) {
+          if (sub['type'] == 'integer') {
+            final value = int.tryParse(answers[sub['linkId']] ?? '0') ?? 0;
+            subItems.add({
+              "linkId": sub['linkId'],
+              "answer": [
+                {"valueInteger": value}
+              ]
+            });
+          } else if (sub['type'] == 'time') {
+            final value = answers[sub['linkId']] ?? '';
+            if (value.isNotEmpty) {
+              subItems.add({
+                "linkId": sub['linkId'],
+                "answer": [
+                  {"valueTime": value}
+                ]
+              });
+            }
+          }
+        }
+        responseItems.add({
+          "linkId": item['linkId'],
+          "item": subItems
+        });
+      } else if (item['type'] == 'integer') {
+        final value = int.tryParse(answers[item['linkId']] ?? '0') ?? 0;
+        responseItems.add({
+          "linkId": item['linkId'],
+          "answer": [
+            {"valueInteger": value}
+          ]
+        });
+      } else if (item['type'] == 'time') {
+        final value = answers[item['linkId']] ?? '';
+        if (value.isNotEmpty) {
+          responseItems.add({
+            "linkId": item['linkId'],
+            "answer": [
+              {"valueTime": value}
+            ]
+          });
+        }
+      }
+    }
+
+    return {
+      "resourceType": "QuestionnaireResponse",
+      "status": "completed",
+      "questionnaire": "Questionnaire/Tagebuch",
+      "subject": {"reference": "Patient/111"},
+      "authored": authoredDate.toUtc().toIso8601String(),
+      "item": responseItems
+    };
+  }
+
   Future<void> submitAnswers() async {
     if (questionnaire == null) return;
 
     final patientId = "111";
     final firelyService = FirelyService();
 
-    final response = buildQuestionnaireResponse(
-        patientId, sliderValues, widget.selectedDate);
+    final response = buildQuestionnaireResponse(patientId, answers, widget.selectedDate);
 
     try {
       await firelyService.postQuestionnaireResponse(response);
@@ -102,7 +139,87 @@ class _TagebuchPageState extends State<TagebuchPage> {
     }
   }
 
-  //UI section
+  Widget buildItemRow(Map<String, dynamic> item) {
+    // Gruppe
+    if (item['type'] == 'group') {
+      final subItems = (item['item'] as List<dynamic>).cast<Map<String, dynamic>>();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Text(item['text'], style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          if (item['linkId'] == '5') // Erklärung über Schlafstörungen
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+            ),
+          ...subItems.map((sub) => buildItemRow(sub)).toList(),
+        ],
+      );
+    }
+
+    // Integer-Feld
+    if (item['type'] == 'integer') {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            Expanded(flex: 2, child: Text(item['text'])),
+            Expanded(
+              flex: 1,
+              child: TextFormField(
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    answers[item['linkId']] = value;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Time-Feld: Einfach direkt eintippen
+    if (item['type'] == 'time') {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            Expanded(flex: 2, child: Text(item['text'])),
+            Expanded(
+              flex: 1,
+              child: TextFormField(
+                keyboardType: TextInputType.datetime,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d:]'))
+                ],
+                decoration: const InputDecoration(
+                  hintText: 'HH:mm',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    answers[item['linkId']] = value;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: CircularProgressIndicator());
@@ -126,7 +243,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
         elevation: 6,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(
@@ -134,6 +251,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 8),
             Text(
               description,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -141,39 +259,8 @@ class _TagebuchPageState extends State<TagebuchPage> {
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final q = items[index] as Map<String, dynamic>? ?? {};
-                  final text = q['text'] ?? "Keine Frage verfügbar";
-                  final sliderValue = sliderValues[index] ?? 4;
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          text,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
-                          textAlign: TextAlign.left,
-                        ),
-                        Slider(
-                          value: sliderValue,
-                          min: 0,
-                          max: 8,
-                          divisions: 8,
-                          label: sliderValue.round().toString(),
-                          onChanged: (value) {
-                            setState(() {
-                              sliderValues[index] = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              child: ListView(
+                children: items.map((item) => buildItemRow(item as Map<String, dynamic>)).toList(),
               ),
             ),
             ElevatedButton(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rls_patient_app/pages/auth/login_page.dart';
 import 'theme/theme_provider.dart';
 import 'root_navigation.dart';
 
@@ -32,7 +33,8 @@ class SomniApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       ),
-      home: const RootNavigation(),
+
+      home: const LoginPage(),
     );
   }
 }

@@ -16,7 +16,7 @@ class _RootNavigationState extends State<RootNavigation> {
 
   final List<Widget> _pages = const [
     HomePage(),
-    InfoPageRLS(),   // <-- Neue Info-Seite
+    InfoPageRLS(),
     ProfilePage(),
     SettingsPage(),
   ];
@@ -40,8 +40,8 @@ class _RootNavigationState extends State<RootNavigation> {
             label: 'Start',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),   // <-- NEUES ICON
-            label: 'Info',                     // <-- NEUER NAME
+            icon: Icon(Icons.info),
+            label: 'Info',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -49,7 +49,7 @@ class _RootNavigationState extends State<RootNavigation> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Einstellungen',
+            label: 'Settings',
           ),
         ],
       ),

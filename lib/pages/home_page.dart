@@ -12,12 +12,10 @@ class HomePage extends StatefulWidget {
 // adding tab controller to choos the desired page
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
     
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override

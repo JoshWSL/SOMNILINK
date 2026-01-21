@@ -126,12 +126,6 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                 "Datum: ${date.day}.${date.month}.${date.year}",
                 style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
               ),
-              // coloured icon depending on completion status of the questionnare
-              trailing: Icon(
-                completed ? Icons.check_circle : Icons.help,
-                color: completed ? Colors.green : Colors.amber,
-                size: 32,
-              ),
               onTap: () async {
                 if (!completed) {
                   await _markCompleted(item["id"]);

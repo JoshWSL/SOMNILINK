@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rls_patient_app/pages/info_page.dart';
 import 'pages/home_page.dart';
-import 'pages/consent_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/settings_page.dart';
 

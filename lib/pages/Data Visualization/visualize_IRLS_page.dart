@@ -8,26 +8,24 @@ class VisualizeIrlsPage extends StatefulWidget {
   const VisualizeIrlsPage({super.key});
 
   @override
-  State<VisualizeIrlsPage> createState() =>
-      _VisualizeIrlsPageState();
+  State<VisualizeIrlsPage> createState() => _VisualizeIrlsPageState();
 }
 
-class _VisualizeIrlsPageState
-    extends State<VisualizeIrlsPage> {
-  final String baseUrl = "http://localhost:4080"; // url from firely
+class _VisualizeIrlsPageState extends State<VisualizeIrlsPage> {
+  final String baseUrl = "http://localhost:4080"; // base url with firely port (4080)
 
   bool isLoading = true;
   String? error;
-
+  // generating List for saving the respones
   List<_IrlsEntry> entries = [];
 
   @override
   void initState() {
     super.initState();
-    loadData(patientId: '111'); // will be dynamic later on
+    loadData(patientId: '111'); // so far hard coded, to be dynamic in future
   }
 
-  //load the questionnaires from the firely server
+  // load data from firely-server
   Future<void> loadData({required String patientId}) async {
     try {
       final res = await http.get(
@@ -35,7 +33,7 @@ class _VisualizeIrlsPageState
           '$baseUrl/QuestionnaireResponse'
           '?subject=http://localhost:4080/Patient/$patientId'
           '&_sort=-authored'
-          '&_count=50', 
+          '&_count=50',
         ),
         headers: {'Accept': 'application/fhir+json'},
       );
@@ -47,11 +45,10 @@ class _VisualizeIrlsPageState
       final decoded = jsonDecode(res.body);
       final List bundleEntries = decoded['entry'] ?? [];
 
-      // filter for the desired questionnaires (IRLS)
       final filteredEntries = bundleEntries
           .map((e) => e['resource'])
           .where((resource) =>
-              resource['questionnaire'] == 'Questionnaire/IRLS')
+              resource['questionnaire'] == 'Questionnaire/IRLS') // fhire slug = IRLS
           .map<_IrlsEntry>((resource) {
         final authored = DateTime.parse(resource['authored']).toLocal();
         final items = resource['item'] as List<dynamic>? ?? [];
@@ -67,11 +64,9 @@ class _VisualizeIrlsPageState
         return _IrlsEntry(date: authored, sum: sum);
       }).toList();
 
-      // sort descending chronologically
       filteredEntries.sort((a, b) => a.date.compareTo(b.date));
 
-      // filter for last 7 entries
-      final last7Entries = filteredEntries.length > 7
+      final last7Entries = filteredEntries.length > 7 // select only the last 7 entries
           ? filteredEntries.sublist(filteredEntries.length - 7)
           : filteredEntries;
 
@@ -86,8 +81,8 @@ class _VisualizeIrlsPageState
       });
     }
   }
-
-  //UI section
+ 
+  // build general UI items
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -96,13 +91,12 @@ class _VisualizeIrlsPageState
       );
     }
 
-    // catch error
     if (error != null) {
       return Scaffold(
         body: Center(child: Text("Fehler: $error")),
       );
     }
-    // catch error if no Data is accessable
+
     if (entries.isEmpty) {
       return const Scaffold(
         body: Center(child: Text("Keine Daten vorhanden")),
@@ -110,7 +104,6 @@ class _VisualizeIrlsPageState
     }
 
     return Scaffold(
-      // app bar (same on every page)
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -124,7 +117,6 @@ class _VisualizeIrlsPageState
         backgroundColor: Colors.blue,
         elevation: 6,
       ),
-      // title of the chart
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -140,19 +132,12 @@ class _VisualizeIrlsPageState
       ),
     );
   }
-
-  // biulding the line chart with total IRLS score
+ // Build line graph (x = dates , y = score)
   Widget buildChart() {
-    final DateTime startDate = entries.first.date;
-    final double maxX = entries.last.date
-        .difference(startDate)
-        .inDays
-        .toDouble();
-
     return LineChart(
       LineChartData(
         minX: 0,
-        maxX: maxX == 0 ? 1 : maxX,
+        maxX: (entries.length - 1).toDouble(),
         minY: 0,
         maxY: 40,
         gridData: FlGridData(show: true),
@@ -169,9 +154,16 @@ class _VisualizeIrlsPageState
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
+              reservedSize: 32,
               getTitlesWidget: (value, meta) {
-                final date =
-                    startDate.add(Duration(days: value.toInt()));
+                final index = value.toInt();
+
+                if (index < 0 || index >= entries.length) {
+                  return const SizedBox.shrink();
+                }
+
+                final date = entries[index].date;
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
@@ -189,13 +181,9 @@ class _VisualizeIrlsPageState
         ),
         lineBarsData: [
           LineChartBarData(
-            spots: entries.map((entry) {
-              final x = entry.date
-                  .difference(startDate)
-                  .inDays
-                  .toDouble();
-              return FlSpot(x, entry.sum.toDouble());
-            }).toList(),
+            spots: List.generate(entries.length, (i) {
+              return FlSpot(i.toDouble(), entries[i].sum.toDouble());
+            }),
             isCurved: false,
             barWidth: 3,
             dotData: FlDotData(show: true),
@@ -206,7 +194,8 @@ class _VisualizeIrlsPageState
   }
 }
 
-// class for saving temporary results
+
+// class to save results temp
 class _IrlsEntry {
   final DateTime date;
   final int sum;

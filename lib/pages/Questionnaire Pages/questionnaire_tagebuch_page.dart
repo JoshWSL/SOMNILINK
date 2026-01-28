@@ -18,7 +18,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
   bool isLoading = true;
   String? error;
 
-  Map<String, String> answers = {}; // für integer und time HH:mm:ss
+  Map<String, String> answers = {}; // for integer and time in format HH:mm:ss
 
   @override
   void initState() {
@@ -159,6 +159,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
       );
     }
 
+    // data handling for the integer values
     if (item['type'] == 'integer') {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -186,6 +187,7 @@ class _TagebuchPageState extends State<TagebuchPage> {
       );
     }
 
+    // data handling for the time values
     if (item['type'] == 'time') {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),

@@ -12,7 +12,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Patientendaten
+  // Patient data (dummy)
   String name = "Unbekannt";
   String email = "-";
   String patientId = "PID-0000";
@@ -20,7 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String medication = "Keine Angaben";
   String severity = "Unbekannt";
 
-  // Systemdaten
+  // System data (dummy)
   String lastConsent = "Keine Daten";
   int symptomCount = 0;
 
@@ -35,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
  Future<void> loadProfile() async {
   final prefs = await SharedPreferences.getInstance();
 
-  // Patient-ID lokal holen
+  // get Patient ID 
   patientId = prefs.getString("patientId") ?? "PID-0000";
 
   try {
@@ -46,7 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     setState(() {
       name = patient.name;
-      severity = patient.gender; // Beispiel-Mapping
+      severity = patient.gender; // example mapping
       _loading = false;
     });
 

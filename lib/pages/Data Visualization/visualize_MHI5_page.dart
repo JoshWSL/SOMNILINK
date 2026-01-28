@@ -15,20 +15,20 @@ class VisualizeMhi5Page extends StatefulWidget {
 }
 
 class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
-  final String baseUrl = "http://localhost:4080";
+  final String baseUrl = "http://localhost:4080"; // base url with firely port (4080)
 
   bool isLoading = true;
   String? error;
-
+   // generating List for saving the respones
   List<_Mhi5Entry> entries = [];
 
   @override
   void initState() {
     super.initState();
-    loadData(patientId: '111'); // später dynamisch
+    loadData(patientId: '111');// so far hard coded, to be dynamic in future
   }
 
-  // Method to load tagebuch from firely server / catching exeptions for several errors that might occur
+  // load data from firely-server
   Future<void> loadData({required String patientId}) async {
     try {
       final res = await http.get(
@@ -51,7 +51,7 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
       final filteredEntries = bundleEntries
           .map((e) => e['resource'])
           .where((resource) =>
-              resource['questionnaire'] == 'Questionnaire/MHI-5')
+              resource['questionnaire'] == 'Questionnaire/MHI-5') // fhire slug = mhi-5
           .map<_Mhi5Entry>((resource) {
         final authored = DateTime.parse(resource['authored']).toLocal();
         final items = resource['item'] as List<dynamic>? ?? [];
@@ -64,8 +64,7 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
           }
         }
 
-        // calculation of MHI-5 total score
-        final double score = 100 * ((sum - 5) / 25);
+        final double score = 100 * ((sum - 5) / 25); // calculate score
 
         return _Mhi5Entry(
           date: authored,
@@ -75,7 +74,7 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
 
       filteredEntries.sort((a, b) => a.date.compareTo(b.date));
 
-      final last7Entries = filteredEntries.length > 7
+      final last7Entries = filteredEntries.length > 7 // select only the last 7 entries
           ? filteredEntries.sublist(filteredEntries.length - 7)
           : filteredEntries;
 
@@ -91,6 +90,7 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
     }
   }
 
+ // build general UI items
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -99,7 +99,6 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
       );
     }
 
-    // catch errors for no data available with error messages
     if (error != null) {
       return Scaffold(
         body: Center(child: Text("Fehler: $error")),
@@ -141,21 +140,14 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
       ),
     );
   }
-
-  // method to build the line chart with the total score
+ // Build line graph (x = dates , y = score)
   Widget buildChart() {
-    final DateTime startDate = entries.first.date;
-    final double maxX = entries.last.date
-        .difference(startDate)
-        .inDays
-        .toDouble();
-
     return LineChart(
       LineChartData(
         minX: 0,
-        maxX: maxX == 0 ? 1 : maxX,
+        maxX: (entries.length - 1).toDouble(),
         minY: 0,
-        maxY: 100, 
+        maxY: 100,
         gridData: FlGridData(show: true),
         borderData: FlBorderData(show: true),
         titlesData: FlTitlesData(
@@ -170,9 +162,16 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
+              reservedSize: 32,
               getTitlesWidget: (value, meta) {
-                final date =
-                    startDate.add(Duration(days: value.toInt()));
+                final index = value.toInt();
+
+                if (index < 0 || index >= entries.length) {
+                  return const SizedBox.shrink();
+                }
+
+                final date = entries[index].date;
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
@@ -190,13 +189,9 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
         ),
         lineBarsData: [
           LineChartBarData(
-            spots: entries.map((entry) {
-              final x = entry.date
-                  .difference(startDate)
-                  .inDays
-                  .toDouble();
-              return FlSpot(x, entry.score);
-            }).toList(),
+            spots: List.generate(entries.length, (i) {
+              return FlSpot(i.toDouble(), entries[i].score);
+            }),
             isCurved: false,
             barWidth: 3,
             dotData: FlDotData(show: true),
@@ -207,7 +202,7 @@ class _VisualizeMhi5PageState extends State<VisualizeMhi5Page> {
   }
 }
 
-// class to save date and score temporary
+// Class to save intermediate results temporarily
 class _Mhi5Entry {
   final DateTime date;
   final double score;

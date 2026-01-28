@@ -31,8 +31,8 @@ class InfoPageRLS extends StatelessWidget {
             const SizedBox(height: 10),
 
             const Text(
-              "Restless-Legs-Syndrom (RLS)",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              "Imformationen über RLS",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 15),
@@ -102,9 +102,10 @@ class InfoPageRLS extends StatelessWidget {
             _infoBullet("Regelmäßiger Schlafrhythmus"),
             _infoBullet("Bewegung statt langes Sitzen"),
 
+            
             const SizedBox(height: 40),
             const Text(
-              "Weitere Informationen",
+              "Weitere Informationen auf der RLS e.V.-Website",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             GestureDetector(
@@ -117,6 +118,65 @@ class InfoPageRLS extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 40),
+
+
+            const Text(
+              "Information über Fragebögen",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              "IRLS – International RLS Severity Scale ",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              "Der IRLS-Score bietet Patienten eine beschreibung des Schweregrades der RLS-Erkrankung. Der Verlauf des IRLS-Scores stellt zusammengefasst den allgemeinen"
+              " Symptomverlauf der Krankheit dar.",
+              style: TextStyle(fontSize: 18),
+            ),
+
+
+            const SizedBox(height: 10),
+
+            const Text(
+              "MHI-5 – Mental Health Inentory ",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              "Der MHI-5-Score bildet Stimmungs- und Angststörungen in aus den letzten 4 Wochen ab. Der Verlauf des MHI-5-Scores bietet einen Überblick über den Zustand der "
+              " mentalen Gesundheit aus den vergangenen Wochen.",
+              style: TextStyle(fontSize: 18),
+            ),
+
+
+            const SizedBox(height: 10),
+
+            const Text(
+              "RLS-6-Skalen",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              "Der RLS-6-Fragebogen beschreibt in 6 Fragen die Auswirkung der RLS-Erkrankung auf den Alltag von Patienten. Dabei lässt sich kein Gesamtscore berechnen. "
+              " Die Antworten des Fragebogens werden individuell betrachtet.",
+              style: TextStyle(fontSize: 18),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              "Tagebuch",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              "Der in dieser App als Tagebuch bezeichnete Fragebogen dient der Erfassung der Schlafgesundheit der Patienten"
+              " Er bietet die möglichkeit der täglichen Dokumentation von Schlafenszeiten und Qualität des Schlafes",
+              style: TextStyle(fontSize: 18),
+            ),
+
+
           ],
         ),
       ),

@@ -9,7 +9,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-// adding tab controller to choos the desired page
+// adding tab controller to choose the desired page
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
     
@@ -57,7 +57,8 @@ Widget build(BuildContext context) {
                     ),
                   );
                 },
-                child: const Text("Daten Eingeben"),
+                // first option: enter new data
+                child: const Text("Daten eingeben"),
               ),
             ),
             const SizedBox(height: 15),
@@ -72,6 +73,7 @@ Widget build(BuildContext context) {
                     ),
                   );
                 },
+                // second option: show previosly entered data
                 child: const Text("Daten anzeigen"),
               ),
             ),

@@ -14,9 +14,10 @@ class RootNavigation extends StatefulWidget {
 class _RootNavigationState extends State<RootNavigation> {
   int _currentIndex = 0;
 
+  // List with the pages that are selectable in the navigation bar
   final List<Widget> _pages = const [
     HomePage(),
-    InfoPageRLS(),   // <-- Neue Info-Seite
+    InfoPageRLS(),   
     ProfilePage(),
     SettingsPage(),
   ];
@@ -26,6 +27,7 @@ class _RootNavigationState extends State<RootNavigation> {
     return Scaffold(
       body: _pages[_currentIndex],
 
+      // Navigation bar that sends user to the selected page 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
@@ -34,14 +36,15 @@ class _RootNavigationState extends State<RootNavigation> {
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
 
+        // each page of the navigation bar is represented with an intuituve button
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Start',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.info_outline),   // <-- NEUES ICON
-            label: 'Info',                     // <-- NEUER NAME
+            icon: Icon(Icons.info_outline),   
+            label: 'Info',                     
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

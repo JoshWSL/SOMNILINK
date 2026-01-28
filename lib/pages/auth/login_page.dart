@@ -18,10 +18,10 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _login() async {
     setState(() => _loading = true);
 
-    // --- HIER später API Login einbauen ---
+    // api connection must be implemented here later on
     await Future.delayed(const Duration(seconds: 1));
 
-    // Bei Erfolg → Navigiere zur RootNavigation (mit BottomNav)
+    // if login is a success -> navigation to home page
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const RootNavigation()),
@@ -30,6 +30,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = false);
   }
 
+  // Build UI with entry fields and button
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 40),
-
+                // enter user
                 TextField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
@@ -56,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 20),
-
+                // enter password
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -68,6 +69,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 30),
 
+                // button to confirm the login process
                 _loading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
@@ -80,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 20),
 
+                // option to register (for first time using the app)
                 TextButton(
                   onPressed: () {Navigator.push(
                   context,

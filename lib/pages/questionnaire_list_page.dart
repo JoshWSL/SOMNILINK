@@ -77,7 +77,7 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
     });
   }
 
-  // save if a questionnaire is completet or not
+  // save if a questionnaire is completed or not
   Future<void> _markCompleted(String id) async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList("completed_questionnaires") ?? [];
@@ -132,28 +132,28 @@ class _QuestionnaireListPageState extends State<QuestionnaireListPage> {
                 }
 
                 // Navigation to the questionnares by taping the buttons
-                if (item["id"] == "q1") {
+                if (item["id"] == "q1") { // q1 = Tagebuch
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => TagebuchPage(selectedDate: item["date"])),
                   );
                 }
-                if (item["id"] == "q2") {
+                if (item["id"] == "q2") {// q2 = IRLS
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>  IrlsPage(selectedDate: item["date"])),
                   );
                 }
-                if (item["id"] == "q3") {
+                if (item["id"] == "q3") { // q3 = MHI-5
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) =>  Mhi5Page(selectedDate: item["date"])),
                   );
                 }
-                if (item["id"] == "q4") {
+                if (item["id"] == "q4") { // q4 = RLS6
                   Navigator.push(
                     context,
                     MaterialPageRoute(

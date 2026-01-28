@@ -1,8 +1,9 @@
 
-// GET und POST Requests für die FHIR-Ressourcen von Django Backend
-// Zugriff jeweils nur auf die Daten der jeweiligen ID
-// Mit Fehler Behandlung für den Fall eines Netzwerkfehlers 
-// Daten werden als JSON versendet und empfangen
+// GET Requests for FHIR-Ressources from Django Backend
+// ID is defined in questionnaire pages, not in this page
+// Exception handling for unforeseen errors
+// Questionnaires are recived as .json
+// Based on dio api service
 
 import 'package:dio/dio.dart';
 import 'api_service_dio.dart';
@@ -11,7 +12,7 @@ class FhirService {
   final Dio dio = ApiClient.instance;
 
 
-  // GET: Patient 
+  // GET: Patient // is not used at the moment (to be implemented in the future)
   Future<Map<String, dynamic>> getPatient(String id) async {
     try {
       final response = await dio.get("/patient/$id/");
@@ -30,7 +31,7 @@ class FhirService {
 // GET: IRLS Questionnaire
   Future<Map<String, dynamic>> getIrlsQuestionnaire() async {
     try {
-      final response = await dio.get("questionnaires/IRLS/");
+      final response = await dio.get("questionnaires/IRLS/"); // slug from django
       if (response.statusCode == 200) {
         return response.data;
       } else {
@@ -48,7 +49,7 @@ class FhirService {
   // GET: MHI-5 Questionnaire
   Future<Map<String, dynamic>> getMhi5Questionnaire() async {
     try {
-      final response = await dio.get("questionnaires/MHI-5/");
+      final response = await dio.get("questionnaires/MHI-5/");// slug from django
       if (response.statusCode == 200) {
         return response.data;
       } else {
@@ -66,7 +67,7 @@ class FhirService {
     // GET: Tagebuch Questionnaire
   Future<Map<String, dynamic>> getTagebuchQuestionnaire() async {
     try {
-      final response = await dio.get("questionnaires/Tagebuch/");
+      final response = await dio.get("questionnaires/Tagebuch/");// slug from django
       if (response.statusCode == 200) {
         return response.data;
       } else {
@@ -84,7 +85,7 @@ class FhirService {
       // GET: RLS-6 Questionnaire
   Future<Map<String, dynamic>> getRls6Questionnaire() async {
     try {
-      final response = await dio.get("questionnaires/RLS-6/");
+      final response = await dio.get("questionnaires/RLS-6/");// slug from django
       if (response.statusCode == 200) {
         return response.data;
       } else {

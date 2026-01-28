@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 
+// page for registrating a new user
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -15,12 +17,15 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _errorMessage;
   bool _loading = false;
 
+ 
+  // activates register process with auth_service.page
   Future<void> _register() async {
     setState(() {
       _loading = true;
       _errorMessage = null;
     });
 
+    // call backend service for registration
     final result = await AuthService.register(
       _username.text.trim(),
       _password.text.trim(),
@@ -29,15 +34,15 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _loading = false);
 
     if (result.success) {
-      Navigator.pop(context); // zurück zum Login
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Registrierung erfolgreich!")),
       );
-    } else {
       setState(() => _errorMessage = result.errorMessage);
     }
   }
 
+  /// Build UI of register page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,9 +62,9 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Richtet die Überschrift links aus
+          crossAxisAlignment: CrossAxisAlignment.start, 
           children: [
-            // Die neue Überschrift unter der AppBar
+            // user information
             const Text(
               "Bitte für die Registrierung Benutzername und Passwort eingeben",
               style: TextStyle(
@@ -67,9 +72,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 color: Colors.black87,
               ),
             ),
-            
-            const SizedBox(height: 25), // Abstand nach der Überschrift
+            const SizedBox(height: 25),
 
+            // enter user name
             TextField(
               controller: _username,
               decoration: const InputDecoration(
@@ -80,6 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             const SizedBox(height: 20),
 
+            // enter password
             TextField(
               controller: _password,
               obscureText: true,
@@ -99,9 +105,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
             const SizedBox(height: 25),
 
+            // Register button
             SizedBox(
               width: double.infinity,
-              height: 50, // Feste Höhe für den Button
+              height: 50, 
               child: ElevatedButton(
                 onPressed: _loading ? null : _register,
                 style: ElevatedButton.styleFrom(

@@ -1,3 +1,6 @@
+// dummy page for the patient
+// later on patient data will be filled with data from backend (firely) server
+
 class Patient {
   final String id;
   final String name;

@@ -16,9 +16,10 @@ class VisualizeTagebuchPage extends StatefulWidget {
 }
 
 class _VisualizeTagebuchPageState extends State<VisualizeTagebuchPage> {
-  final String baseUrl = "http://localhost:4080";
+  final String baseUrl = "http://localhost:4080"; // url with firely server port (4080)
   bool isLoading = true;
   String? error;
+  // List to save the results
   List<dynamic> items = [];
 
 

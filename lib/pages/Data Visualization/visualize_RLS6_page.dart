@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
-// for RLS-6, no total score is available -> slection of single questions that are displayed in a line chart
-
+// for RLS-6, no total score is available -> selection of single questions, displayed in a line chart
 
 class VisualizeRls6Page extends StatefulWidget {
   const VisualizeRls6Page({super.key});
@@ -15,30 +14,29 @@ class VisualizeRls6Page extends StatefulWidget {
 }
 
 class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
-  final String baseUrl = "http://localhost:4080";
+  final String baseUrl = "http://localhost:4080"; // base url with firely port (4080)
 
   bool isLoading = true;
   String? error;
 
-  // item that is selected by default -> Schlafzufriedenheit
   String selectedItem = '1';
 
-  // Mapping table for the drop down selection-options
+  // selections of the question of interest -> will be selected in a drop down
   final Map<String, String> itemOptions = {
     '1': 'Zufriedenheit mit meinem Schlaf',
     '2.4': 'Zufriedenheit mit meinem Alltag',
     '3': 'Müdigkeit in letzter Zeit',
   };
 
+  // generating a lsit to hold the responses
   List<_Rls6Entry> entries = [];
 
   @override
   void initState() {
     super.initState();
-    loadData(patientId: '111');
+    loadData(patientId: '111'); // will be dynamic later on
   }
 
-  // Method to load tagebuch from firely server / catching exeptions for several errors that might occur
   Future<void> loadData({required String patientId}) async {
     try {
       final res = await http.get(
@@ -61,13 +59,12 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
       final filteredEntries = bundleEntries
           .map((e) => e['resource'])
           .where((resource) =>
-              resource['questionnaire'] == 'Questionnaire/RLS-6')
+              resource['questionnaire'] == 'Questionnaire/RLS-6') // firely slug = RLS-6
           .map<_Rls6Entry>((resource) {
         final authored = DateTime.parse(resource['authored']).toLocal();
         final items = resource['item'] as List<dynamic>? ?? [];
 
-        final int? value =
-            _findAnswerValue(items, selectedItem);
+        final int? value = _findAnswerValue(items, selectedItem);
 
         return _Rls6Entry(
           date: authored,
@@ -77,7 +74,7 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
 
       filteredEntries.sort((a, b) => a.date.compareTo(b.date));
 
-      final last7Entries = filteredEntries.length > 7
+      final last7Entries = filteredEntries.length > 7 // show only the last 7 entries
           ? filteredEntries.sublist(filteredEntries.length - 7)
           : filteredEntries;
 
@@ -93,7 +90,7 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
     }
   }
 
-  // find the answer value that is desired for the selected drop-down option
+  // get answers that is of interest -> dropdown selection
   int? _findAnswerValue(List<dynamic> items, String linkId) {
     for (final item in items) {
       if (item['linkId'] == linkId) {
@@ -104,17 +101,15 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
       }
 
       if (item['item'] != null) {
-        final found =
-            _findAnswerValue(item['item'], linkId);
+        final found = _findAnswerValue(item['item'], linkId);
         if (found != null) return found;
       }
     }
     return null;
   }
-
+ // build general UI items
   @override
   Widget build(BuildContext context) {
-    // catch errors with error message
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -134,7 +129,6 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
     }
 
     return Scaffold(
-      // App Bar that is consistent to every other page
       appBar: AppBar(
         title: const Text(
           "SomniLink",
@@ -155,10 +149,11 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
             Row(
               children: [
                 const Text(
-                  "Auswahl der Gewünschten Information:",
+                  "Auswahl der gewünschten Information:",
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(width: 12),
+                // Selection of the question of interest
                 DropdownButton<String>(
                   value: selectedItem,
                   items: itemOptions.entries.map((entry) {
@@ -185,21 +180,14 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
       ),
     );
   }
-
-  // Method to build line chart
+   // Build line graph (x = dates , y = score)
   Widget buildChart() {
-    final DateTime startDate = entries.first.date;
-    final double maxX = entries.last.date
-        .difference(startDate)
-        .inDays
-        .toDouble();
-
     return LineChart(
       LineChartData(
         minX: 0,
-        maxX: maxX == 0 ? 1 : maxX,
+        maxX: (entries.length - 1).toDouble(),
         minY: 0,
-        maxY: 10, 
+        maxY: 10,
         gridData: FlGridData(show: true),
         borderData: FlBorderData(show: true),
         titlesData: FlTitlesData(
@@ -214,9 +202,16 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
+              reservedSize: 32,
               getTitlesWidget: (value, meta) {
-                final date =
-                    startDate.add(Duration(days: value.toInt()));
+                final index = value.toInt();
+
+                if (index < 0 || index >= entries.length) {
+                  return const SizedBox.shrink();
+                }
+
+                final date = entries[index].date;
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
@@ -234,13 +229,9 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
         ),
         lineBarsData: [
           LineChartBarData(
-            spots: entries.map((entry) {
-              final x = entry.date
-                  .difference(startDate)
-                  .inDays
-                  .toDouble();
-              return FlSpot(x, entry.value);
-            }).toList(),
+            spots: List.generate(entries.length, (i) {
+              return FlSpot(i.toDouble(), entries[i].value);
+            }),
             isCurved: false,
             barWidth: 3,
             dotData: FlDotData(show: true),
@@ -251,7 +242,7 @@ class _VisualizeRls6PageState extends State<VisualizeRls6Page> {
   }
 }
 
-// Class to save the answers temporary
+// Class to save intermediate results temp.
 class _Rls6Entry {
   final DateTime date;
   final double value;
